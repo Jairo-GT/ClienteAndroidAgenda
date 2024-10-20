@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PruebaMauiAndroid.Views.MainPageAdmin"
+             Title="Administración de usuarios">
+
+
+
+    <Grid >
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10*"/>
+            <RowDefinition Height="*"/>
+
+        </Grid.RowDefinitions>
+    <VerticalStackLayout VerticalOptions="FillAndExpand">
+ 
+
+        <Entry Placeholder="Buscar..." Margin="5,5,5,5"/>
+
+        <ListView x:Name="userListViewUI">
+          
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <ViewCell>
+                        <Grid ColumnSpacing="10" Padding="2">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <Label Grid.Column="0" Text="{Binding .}" VerticalOptions="Center" HorizontalOptions="Center" />
+                            <Button Grid.Column="1" Text="Editar" TextColor="AntiqueWhite" FontSize="10" FontAttributes="Bold" />
+                            <Button Grid.Column="2" Text="X" BackgroundColor="OrangeRed" TextColor="AntiqueWhite" FontSize="10" FontAttributes="Bold" />
+                        </Grid>
+                    </ViewCell>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+      
+    </VerticalStackLayout>
+    <Button Grid.Row="1" Text="Cerrar sesión"
+ BackgroundColor="IndianRed"
+  FontAttributes="Bold" Margin="5,5,5,5" />
+
+    </Grid>
+</ContentPage>

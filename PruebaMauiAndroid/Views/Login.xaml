@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
+             x:Class="PruebaMauiAndroid.Views.Login" >
+
+
+  
+
+    <VerticalStackLayout Padding="10" VerticalOptions="Center">
+
+        <Label HorizontalOptions="Center" TextColor="AntiqueWhite" FontSize="24" FontAttributes="Bold">AGENDA</Label>
+
+        <skia:SKLottieView RepeatCount="-1"
+                   RepeatMode="Restart"
+                   Source="waiting.json"
+                   HeightRequest="250"
+                   WidthRequest="250" />
+
+
+        <!-- Nombre usuario-->
+        <Entry Placeholder="Usuario"  Keyboard="Plain"  TextColor="AntiqueWhite" x:Name="usernameEntry" />
+
+        <!-- Contraseña -->
+        <Entry Placeholder="Contraseña" IsPassword="True" TextColor="AntiqueWhite" x:Name="passwordEntry" />
+
+        <!-- Botón logear -->
+        <Button Text="Entrar" FontSize="18" FontAttributes="Bold"  Margin="0,0,0,5" x:Name="LoginButton" Clicked="LoginButton_Clicked"/>
+
+        <Label TextColor="AntiqueWhite" FontSize="14">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span TextColor="AntiqueWhite"  Text="¿Aún no tienes cuenta?" />
+                    <Span TextColor="AntiqueWhite" Text=" Únete a nosotros " />
+                    <Span TextColor="FloralWhite" FontAttributes="Bold" Text="aquí" TextDecorations="Underline" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+
+        <Label Text="¿Olvidaste tu contraseña?"
+       TextColor="Blue"
+       FontSize="14"
+       FontAttributes="Bold"
+       Margin="0,5,0,40">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span  TextColor="AntiqueWhite" Text="¿Olvidaste tu contraseña? " />
+                    <Span Text="Reestablecer contraseña" FontAttributes="Bold"  TextColor="FloralWhite" TextDecorations="Underline" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+        
+        
+  <!--
+        <Label TextColor="FloralWhite" HorizontalTextAlignment="Center"  Margin="0,0,0,15">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span TextColor="FloralWhite" Text="¡Bienvenido a tu Agenda Personal!" FontSize="24" FontAttributes="Bold" />
+                    <Span TextColor="AntiqueWhite" Text="Organiza tu vida de manera fácil y eficiente. Con esta aplicación podrás:" FontSize="15" LineHeight="2"/>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+        <Label TextColor="FloralWhite" HorizontalTextAlignment="Start" Margin="0,0,0,10">
+            <Label.FormattedText>
+                <FormattedString>
+                    <Span TextColor="AntiqueWhite"  Text="• Crear recordatorios" FontSize="16" FontAttributes="Bold" LineHeight="2"/>
+                    <Span TextColor="AntiqueWhite"  Text=" para que nunca olvides lo importante." FontSize="14" />
+
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+        <Label TextColor="FloralWhite" HorizontalTextAlignment="Start" Margin="0,0,0,10">
+            <Label.FormattedText>
+                <FormattedString>
+
+                    <Span TextColor="AntiqueWhite"  Text="• Tomar notas" FontSize="16" FontAttributes="Bold" LineHeight="2"/>
+                    <Span TextColor="AntiqueWhite"  Text=" rápidas y mantener tus ideas organizadas." FontSize="14" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+
+        <Label TextColor="FloralWhite" HorizontalTextAlignment="Start" Margin="0,0,0,10">
+            <Label.FormattedText>
+                <FormattedString>
+
+                    <Span TextColor="AntiqueWhite"  Text="• Planificar tus tareas diarias" FontSize="16" FontAttributes="Bold" LineHeight="2"/>
+                    <Span TextColor="AntiqueWhite"  Text=" para aprovechar al máximo tu tiempo." FontSize="14" />
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+
+
+        <Label TextColor="FloralWhite" HorizontalTextAlignment="Center" Margin="0,0,0,30">
+            <Label.FormattedText>
+                <FormattedString>
+
+                    <Span TextColor="AntiqueWhite"  Text="Inicia sesión y comienza a gestionar tu día a día con facilidad. ¡La organización nunca fue tan simple!" FontSize="14" LineHeight="2"/>
+                </FormattedString>
+            </Label.FormattedText>
+        </Label>
+  -->
+   
+    </VerticalStackLayout>
+</ContentView>

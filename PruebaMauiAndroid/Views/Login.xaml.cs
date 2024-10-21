@@ -7,7 +7,7 @@ public partial class Login : ContentView
 {
 
 
-    private ServerConnection serverConnection  = new ServerConnection("127.0.0.1",8080);
+    private ServerConnection serverConnection  = new ServerConnection("10.0.2.2", 12522);
 
 	public Login()
 	{
@@ -19,10 +19,10 @@ public partial class Login : ContentView
     private string sanetizeAndValidateUsername(string username)
     {
 
-        string sanitizedUsername = new string(username.Where(char.IsLetter).ToArray());
 
 
-        return sanitizedUsername;
+
+        return username;
 
     }
 
@@ -48,6 +48,7 @@ public partial class Login : ContentView
 
         if (usernameEntry.Text == null || passwordEntry.Text == null)
         {
+            Console.WriteLine("Invalid data");
 
             //TODO:
             return;
@@ -57,8 +58,15 @@ public partial class Login : ContentView
         string password = sanetizeAndValidatePassword(passwordEntry.Text.Trim());
 
 
-        string loginData = "101" + string.Format("2d", user.Length) + user + string.Format("2d", password.Length) + password;
+        string loginData = "101" + string.Format("{0:D2}", user.Length) + user + string.Format("{0:D2}", password.Length) + password;
+
+
+        await App.Current.MainPage.DisplayAlert("loginData", loginData, "OK");
+
         var response = await serverConnection.SendDataAsync(loginData);
+
+      
+
         serverConnection.ExtractAndSetToken(response);
 
 

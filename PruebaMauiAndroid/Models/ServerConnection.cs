@@ -41,26 +41,39 @@ namespace PruebaMauiAndroid.Models
 
         }
 
-        public async Task<string> SendDataAsync(string dataToSend)
+        public async Task<string> SendDataAsync(string dataToSend,int timeoutMilliseconds = 5000)
         {
             try
             {
               
                 using TcpClient tcpClient = new TcpClient();
-                await tcpClient.ConnectAsync(ip, port);
+              
+
+
+                using var cts = new CancellationTokenSource(timeoutMilliseconds);
+
+                Task connectTask = tcpClient.ConnectAsync(ip, port);
+                if (await Task.WhenAny(connectTask, Task.Delay(timeoutMilliseconds, cts.Token)) != connectTask)
+                {
+                    throw new TimeoutException("Connection timed out.");
+                }
 
                 using NetworkStream networkStream = tcpClient.GetStream();
-                byte[] data = Encoding.UTF8.GetBytes(dataToSend);
+                networkStream.WriteTimeout = timeoutMilliseconds;
+                networkStream.ReadTimeout = timeoutMilliseconds;
+
+
+                byte[] data = Encoding.UTF8.GetBytes(dataToSend + "\n");
                 await networkStream.WriteAsync(data, 0, data.Length);
 
                 await networkStream.FlushAsync();
 
                 byte[] responseBuffer = new byte[1024];
+                int bytesRead = await networkStream.ReadAsync(responseBuffer, 0, responseBuffer.Length, cts.Token);
 
-                int bytesRead = await networkStream.ReadAsync(responseBuffer, 0, responseBuffer.Length);
                 string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
 
-                return response; 
+                return response;
             }
             catch (Exception ex)
             {

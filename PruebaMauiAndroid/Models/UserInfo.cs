@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace PruebaMauiAndroid.Models
 {
+    
     public class UserInfo
 
     {

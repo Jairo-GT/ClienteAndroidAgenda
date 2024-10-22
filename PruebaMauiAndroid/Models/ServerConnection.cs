@@ -11,63 +11,58 @@ namespace PruebaMauiAndroid.Models
 {
     class ServerConnection
     {
-        private string ip;
-        private int port;
-        private string token;
-       
-
-        public async Task<string> populateUserInfo(UserInfo user) {
+        private static string ip;
+        private static int port;
+        public static string token;
+        public static UserInfo user;
 
 
-            
+        public static async Task<bool> userLogout()
+        {
 
 
-            if (!String.IsNullOrEmpty(this.token))
+
+            if (!String.IsNullOrEmpty(ServerConnection.token))
             {
 
-
-                string dataToSend = "205"+string.Format("{0:D2}",this.token.Length)+this.token+ 
-                    string.Format("{0:D2}", user.userName.Length)+user.userName +
-                    string.Format("{0:D2}", user.userName.Length) + user.userName;
+                string dataToSend = "205" + string.Format("{0:D2}", ServerConnection.token.Length) + ServerConnection.token +
+                      string.Format("{0:D2}", user.userName.Length) + user.userName;
 
 
-                Debug.WriteLine(dataToSend);
                 string response = await SendDataAsync(dataToSend);
 
 
-                return response;
-
-               
-
-
-
+                return true;
+               //TODO: Confirmar que la respuesta es el mismo token  y borrar token actual.
+            
             }
 
 
-            return "false";        
-        
+                return false;
         }
+
+     
 
         public ServerConnection(string ip, int port) {
 
-            this.ip = ip;
-            this.port = port;
+            ServerConnection.ip = ip;
+            ServerConnection.port = port;
         
         
         }
 
-        
+       
         public void ExtractAndSetToken(string response)
         {
 
             if(!String.IsNullOrEmpty(response) && response.Length>2)
             {
-                string offset = response.Substring(0, 2);
+                string offset = response.Substring(5, 2);
                 int offsetInt = 0;
                 if (int.TryParse(offset, out offsetInt) && offsetInt > 0)
                 {
 
-                    token = response.Substring(2);
+                    token = response.Substring(7,36);
                 }
 
             }
@@ -75,13 +70,17 @@ namespace PruebaMauiAndroid.Models
 
         }
 
-        public async Task<string> SendDataAsync(string dataToSend,int timeoutMilliseconds = 5000)
+        //Envia data y espera timeoutMilliseconds (5 segons de default) per rebre una resposta del server o cancela el socket
+        public static async Task<string> SendDataAsync(string dataToSend,int timeoutMilliseconds = 5000)
         {
             try
             {
               
-                using TcpClient tcpClient = new TcpClient();
-              
+                using TcpClient tcpClient = new TcpClient()
+                {
+                    NoDelay = true 
+                };
+
 
 
                 using var cts = new CancellationTokenSource(timeoutMilliseconds);
@@ -96,8 +95,9 @@ namespace PruebaMauiAndroid.Models
                 networkStream.WriteTimeout = timeoutMilliseconds;
                 networkStream.ReadTimeout = timeoutMilliseconds;
 
-
+                //Añadimos fin de linea para que el server pueda leer los datos
                 byte[] data = Encoding.UTF8.GetBytes(dataToSend + "\n");
+
                 await networkStream.WriteAsync(data, 0, data.Length);
 
                 await networkStream.FlushAsync();

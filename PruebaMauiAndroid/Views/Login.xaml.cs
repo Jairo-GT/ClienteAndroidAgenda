@@ -6,7 +6,7 @@ using PruebaMauiAndroid.Models;
 public partial class Login : ContentView
 {
 
-
+    //IP para conectar al server local en emulador android (no android studio)
     private ServerConnection serverConnection  = new ServerConnection("10.0.2.2", 12522);
 
 	public Login()
@@ -15,7 +15,7 @@ public partial class Login : ContentView
 	}
 
 
-
+    //Falta que  quedemos en algunas pautas de tamaño,caracters permitidos..
     private string sanetizeAndValidateUsername(string username)
     {
 
@@ -40,10 +40,6 @@ public partial class Login : ContentView
     //TODO: extraer la logica de datos al ViewModel
     private async void LoginButton_Clicked(object sender, EventArgs e)
     {
-/*
-        var userCredentials = new Tuple<string, string>("user", "user");
-        var adminCredentials = new Tuple<string, string>("admin", "admin");
-       */
 
 
         if (usernameEntry.Text == null || passwordEntry.Text == null)
@@ -61,45 +57,37 @@ public partial class Login : ContentView
         string loginData = "101" + string.Format("{0:D2}", user.Length) + user + string.Format("{0:D2}", password.Length) + password;
 
 
-       //await App.Current.MainPage.DisplayAlert("loginData", loginData, "OK");
-
-        var response = await serverConnection.SendDataAsync(loginData);
-
-        
-      
+        var response = await ServerConnection.SendDataAsync(loginData);
 
         serverConnection.ExtractAndSetToken(response);
-        //await App.Current.MainPage.DisplayAlert("Server Response", response, "OK");
-
-        UserInfo tempInfo = new(user);
-        string info = await serverConnection.populateUserInfo(tempInfo);
 
 
-        await App.Current.MainPage.DisplayAlert("User info", info, "OK");
-
-
-        /*
-
-        Tuple<string, string> inputCredentials = new Tuple<string, string>( user, password );
+        ServerConnection.user= new(user);
 
 
 
-        if (userCredentials.Equals(inputCredentials))
-        {
-
-            //Para poder ver el menu en un modal sin flecha a atrás
-            await Navigation.PushModalAsync(new MainPageUser());
+        string dataToSend = "205" + string.Format("{0:D2}", ServerConnection.token.Length) + ServerConnection.token +
+                  string.Format("{0:D2}", ServerConnection.user.userName.Length) + ServerConnection.user.userName +
+                  string.Format("{0:D2}", ServerConnection.user.userName.Length) + ServerConnection.user.userName;
 
 
-        }
-        else if (adminCredentials.Equals(inputCredentials))
-        {
 
-            await Navigation.PushModalAsync( new MainPageAdmin());
 
-        }
-            return;
-    */
+        string response2 = await ServerConnection.SendDataAsync(dataToSend);
+
+   
+
+
+        usernameEntry.Text = "";
+        passwordEntry.Text = "";
+
+       if (response2.TrimEnd().Last().ToString() == "1") { 
+            
+            await Navigation.PushModalAsync(new MainPageAdmin()); } 
+        
+        
+        else { await Navigation.PushModalAsync(new MainPageUser()); }
+
 
 
     }

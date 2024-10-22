@@ -40,10 +40,10 @@ public partial class Login : ContentView
     //TODO: extraer la logica de datos al ViewModel
     private async void LoginButton_Clicked(object sender, EventArgs e)
     {
-
+/*
         var userCredentials = new Tuple<string, string>("user", "user");
         var adminCredentials = new Tuple<string, string>("admin", "admin");
-       
+       */
 
 
         if (usernameEntry.Text == null || passwordEntry.Text == null)
@@ -61,17 +61,21 @@ public partial class Login : ContentView
         string loginData = "101" + string.Format("{0:D2}", user.Length) + user + string.Format("{0:D2}", password.Length) + password;
 
 
-        await App.Current.MainPage.DisplayAlert("loginData", loginData, "OK");
+       //await App.Current.MainPage.DisplayAlert("loginData", loginData, "OK");
 
         var response = await serverConnection.SendDataAsync(loginData);
 
+        
       
 
         serverConnection.ExtractAndSetToken(response);
+        //await App.Current.MainPage.DisplayAlert("Server Response", response, "OK");
+
+        UserInfo tempInfo = new(user);
+        string info = await serverConnection.populateUserInfo(tempInfo);
 
 
-        await App.Current.MainPage.DisplayAlert("Server Response", response, "OK");
-
+        await App.Current.MainPage.DisplayAlert("User info", info, "OK");
 
 
         /*
@@ -96,7 +100,7 @@ public partial class Login : ContentView
         }
             return;
     */
-      
-    
+
+
     }
 }

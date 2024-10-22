@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+
 
 namespace PruebaMauiAndroid.Models
 {
@@ -12,7 +14,39 @@ namespace PruebaMauiAndroid.Models
         private string ip;
         private int port;
         private string token;
+       
 
+        public async Task<string> populateUserInfo(UserInfo user) {
+
+
+            
+
+
+            if (!String.IsNullOrEmpty(this.token))
+            {
+
+
+                string dataToSend = "205"+string.Format("{0:D2}",this.token.Length)+this.token+ 
+                    string.Format("{0:D2}", user.userName.Length)+user.userName +
+                    string.Format("{0:D2}", user.userName.Length) + user.userName;
+
+
+                Debug.WriteLine(dataToSend);
+                string response = await SendDataAsync(dataToSend);
+
+
+                return response;
+
+               
+
+
+
+            }
+
+
+            return "false";        
+        
+        }
 
         public ServerConnection(string ip, int port) {
 

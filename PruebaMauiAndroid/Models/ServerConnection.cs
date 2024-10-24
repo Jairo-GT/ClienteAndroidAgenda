@@ -17,9 +17,39 @@ namespace PruebaMauiAndroid.Models
 
         public enum Protocol
         {
-            SERVER_LOGIN_RESPONSES = 1,
-            SERVER_USER_RESPONSES = 2,
-            SERVER_ERROR = 9
+            LOGIN = 1,
+            USER = 2,
+            ERROR = 9
+        }
+
+
+        public enum ServerErrorActions
+        {
+            NOT_ALLOWED = 112,
+            DATA_BORN_GREATER_NOW = 1105,
+            FORMAT_ERROR_PACKET = 101,
+            USER_NAME_ALREADY_EXISTS = 1202,
+            USER_NAME_IS_EMPTY = 1201,
+            FULLNAME_IS_EMPTY = 1203,
+            LOGIN_FAILED = 109,
+            ALREADY_CONNECTED = 113,
+            UNKNOWN_ERROR = 9
+
+        }
+
+        public enum ClientLoginActions {
+        LOGIN = 1,
+        LOGOUT = 2,
+        SHUTDOWN_SERVER = 5
+
+        }
+        public enum ClientUserActions {
+        CHANGE_PASSWORD = 1,
+        CHANGE_FULLNAME = 2,
+        CHANGE_BORN_DATE = 3,
+        CHANGE_OTHER_DATA = 4,
+        GET_USER_INFO = 5
+
         }
 
         public enum ServerLoginActions
@@ -42,6 +72,7 @@ namespace PruebaMauiAndroid.Models
         }
 
 
+        //TODO: Aquí encriptaremos el mensaje hacia el servidor.
         public static string ConstructServerMessage(string protocol, string action, List<string> dataToSend)
         {
             string message = protocol + action;
@@ -94,11 +125,22 @@ namespace PruebaMauiAndroid.Models
 
             int parsedProtocol = -1;
             int parsedAction = -1;
-
+            string data;
             int.TryParse(response[..1], out parsedProtocol);
-            int.TryParse(response.Substring(1, 2), out parsedAction);
-            string data = response.Substring(3);
 
+            //Los otros son siempre 2 bytes para la acción pero en el 9 puede haber más (4 creo segun la wiki).
+            if (parsedProtocol != 9)
+            {
+
+                int.TryParse(response.Substring(1, 2), out parsedAction);
+                data = response.Substring(3);
+            } else
+            {
+
+                int.TryParse(response.Substring(1, 4), out parsedAction);
+                data = response.Substring(5);
+
+            }
             System.Console.WriteLine("ParsedProtocol: " + parsedProtocol + "  ||  ParsedAction:" + parsedAction);
             System.Console.WriteLine("DATA: " + data);
             Protocol protocol = (Protocol)parsedProtocol;
@@ -107,18 +149,18 @@ namespace PruebaMauiAndroid.Models
             switch (protocol)
             {
 
-                case Protocol.SERVER_USER_RESPONSES:
+                case Protocol.USER:
                     ServerUserActions serverUserAction = (ServerUserActions)parsedAction;
                     return HandleServerUserActions(serverUserAction, data);
                  
 
-                case Protocol.SERVER_LOGIN_RESPONSES:
+                case Protocol.LOGIN:
                     ServerLoginActions serverLoginAction = (ServerLoginActions)parsedAction;
                     return HandleServerLoginActions(serverLoginAction, data);
 
-                case Protocol.SERVER_ERROR:
-                    Console.WriteLine("PROTOCOL 9 NOT HANDLED YET.");
-                    return false;
+                case Protocol.ERROR:
+                    ServerErrorActions serverErrorAction = (ServerErrorActions)parsedAction;
+                    return HandleServerErrorActions(serverErrorAction, data);
                 default:
                     Console.WriteLine("Protocolo desconocido.");
                     break;
@@ -126,6 +168,48 @@ namespace PruebaMauiAndroid.Models
 
             return false;
 
+        }
+
+        private static bool HandleServerErrorActions(ServerErrorActions serverAction, string data)
+        {
+
+            switch (serverAction)
+            {
+
+                case ServerErrorActions.DATA_BORN_GREATER_NOW:
+                    Console.WriteLine("La data es major que la data actual.");
+                    break;
+                case ServerErrorActions.FORMAT_ERROR_PACKET:
+                    Console.WriteLine("Error en el formato de paquete enviado al servidor.");
+                    break;
+                case ServerErrorActions.FULLNAME_IS_EMPTY:
+                    Console.WriteLine("El nombre real no puede estar en blanco.");
+                    break;
+                case ServerErrorActions.LOGIN_FAILED:
+                    Console.WriteLine("Los credenciales no son válidos.");
+                    break;
+                case ServerErrorActions.NOT_ALLOWED:
+                    Console.WriteLine("Acción no permitida.");
+                    break;
+                case ServerErrorActions.UNKNOWN_ERROR:
+                    Console.WriteLine("Error desconocodio en el servidor.");
+                    break;
+                case ServerErrorActions.USER_NAME_ALREADY_EXISTS:
+                    Console.WriteLine("El nombre de usuario ya existe.");
+                    break;
+                case ServerErrorActions.USER_NAME_IS_EMPTY:
+                    Console.WriteLine("El nombre de usuario no puede estar vacio.");
+                    break;
+                case ServerErrorActions.ALREADY_CONNECTED:
+                    Console.WriteLine("Ya existe una conexión abierta, hay que hacer logout antes.");
+                    break;
+
+                default:
+                    Console.WriteLine("Acción desconocida para ERROR_RESPONSES");
+                    break;
+            }
+
+            return false;
         }
 
         private static bool HandleServerUserActions(ServerUserActions serverAction, string data)
@@ -142,7 +226,7 @@ namespace PruebaMauiAndroid.Models
                     return true;
 
                 default:
-                    Console.WriteLine("Acción desconocida para SERVER_USER_RESPONSES");
+                    Console.WriteLine("Acción desconocida para USER");
                     break;
             }
 
@@ -170,11 +254,21 @@ namespace PruebaMauiAndroid.Models
                     break;
                 case ServerLoginActions.LOGIN_FAILED:
                     Console.WriteLine("Handling LOGIN_FAILED");
-                    break;
+                    var retTokenFailed = ServerConnection.ParseData(["token"], data);
+                    if (retTokenFailed.ContainsKey("token"))
+                    { 
+                            if(ServerConnection.token == retTokenFailed["token"])
+                        {
+                            ServerConnection.token = null;
+                            return true;
+
+                        }
+                    }
+                        break;
               
 
                 default:
-                    Console.WriteLine("Acción desconocida para SERVER_LOGIN_RESPONSES");
+                    Console.WriteLine("Acción desconocida para LOGIN");
                     break;
             }
 
@@ -186,7 +280,7 @@ namespace PruebaMauiAndroid.Models
         public static async Task<bool> UserLogin(string user, string password)
         {
             ServerConnection.ConnectedUser = new(user);
-            string loginData = ServerConnection.ConstructServerMessage("1", "01", [user, password]);
+            string loginData = ServerConnection.ConstructServerMessage(((int)Protocol.LOGIN).ToString(),((int)ClientLoginActions.LOGIN).ToString() , [user, password]);
 
 
 
@@ -215,7 +309,7 @@ namespace PruebaMauiAndroid.Models
             if (!String.IsNullOrEmpty(ServerConnection.token))
             {
 
-                string dataToSend = ServerConnection.ConstructServerMessage("1", "05", [ServerConnection.token, ConnectedUser.userName]);
+                string dataToSend = ServerConnection.ConstructServerMessage(((int)Protocol.LOGIN).ToString(), ((int)ClientLoginActions.LOGOUT).ToString(), [ServerConnection.token, ConnectedUser.userName]);
                 string response = await SendDataAsync(dataToSend);
 
 
@@ -233,7 +327,7 @@ namespace PruebaMauiAndroid.Models
         public static async Task<bool> GetUserInfo()
         {
 
-            string userInfo = ServerConnection.ConstructServerMessage("2", "05", [ServerConnection.token, ConnectedUser.userName, ConnectedUser.userName]);
+            string userInfo = ServerConnection.ConstructServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.GET_USER_INFO).ToString("D2"), [ServerConnection.token, ConnectedUser.userName, ConnectedUser.userName]);
 
             var response = await ServerConnection.SendDataAsync(userInfo);
 
@@ -295,6 +389,7 @@ namespace PruebaMauiAndroid.Models
 
                 string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
 
+                
                 return response;
             }
             catch (Exception ex)

@@ -21,11 +21,8 @@ public partial class Login : ContentView
     //TODO: extraer la logica de datos al ViewModel
     private async void LoginButton_Clicked(object sender, EventArgs e)
     {
-        if (usernameEntry.Text == null || passwordEntry.Text == null)
-        {
-            Console.WriteLine("Invalid data");
-            return;
-        }
+
+        if (String.IsNullOrWhiteSpace(usernameEntry.Text) || String.IsNullOrWhiteSpace(passwordEntry.Text)) return;
 
         string user = viewModel.sanetizeAndValidateUsername(usernameEntry.Text.Trim());
         string password = viewModel.sanetizeAndValidatePassword(passwordEntry.Text.Trim());

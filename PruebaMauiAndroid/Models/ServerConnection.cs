@@ -14,15 +14,12 @@ namespace PruebaMauiAndroid.Models
         public static string token;
         public static UserInfo ConnectedUser;
 
-
         public enum Protocol
         {
             LOGIN = 1,
             USER = 2,
             ERROR = 9
         }
-
-
         public enum ServerErrorActions
         {
             NOT_ALLOWED = 112,
@@ -36,7 +33,6 @@ namespace PruebaMauiAndroid.Models
             UNKNOWN_ERROR = 9
 
         }
-
         public enum ClientLoginActions {
         LOGIN = 1,
         LOGOUT = 2,
@@ -51,7 +47,6 @@ namespace PruebaMauiAndroid.Models
         GET_USER_INFO = 5
 
         }
-
         public enum ServerLoginActions
         {
             LOGIN_SUCCESS = 3,
@@ -60,7 +55,6 @@ namespace PruebaMauiAndroid.Models
         
 
         }
-
         public enum ServerUserActions
         { 
             USER_INFO = 15,
@@ -71,7 +65,61 @@ namespace PruebaMauiAndroid.Models
 
         }
 
+        //UTILITY & SETUP
 
+        public ServerConnection(string ip, int port)
+        {
+
+            ServerConnection.ip = ip;
+            ServerConnection.port = port;
+
+
+        }
+        public static async Task<string> SendDataAsync(string dataToSend, int timeoutMilliseconds = 5000)
+        {
+            try
+            {
+
+                using TcpClient tcpClient = new()
+                {
+                    NoDelay = true
+                };
+
+
+
+                using var cts = new CancellationTokenSource(timeoutMilliseconds);
+
+                Task connectTask = tcpClient.ConnectAsync(ip, port);
+                if (await Task.WhenAny(connectTask, Task.Delay(timeoutMilliseconds, cts.Token)) != connectTask)
+                {
+                    throw new TimeoutException("Se agotó el tiempo de espera.");
+                }
+
+                using NetworkStream networkStream = tcpClient.GetStream();
+                networkStream.WriteTimeout = timeoutMilliseconds;
+                networkStream.ReadTimeout = timeoutMilliseconds;
+
+                //Añadimos fin de linea para que el server pueda leer los datos
+                byte[] data = Encoding.UTF8.GetBytes(dataToSend + "\n");
+
+                await networkStream.WriteAsync(data, 0, data.Length);
+
+                await networkStream.FlushAsync();
+
+                byte[] responseBuffer = new byte[1024];
+                int bytesRead = await networkStream.ReadAsync(responseBuffer, 0, responseBuffer.Length, cts.Token);
+
+                string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
+
+
+                return response;
+            }
+            catch (Exception ex)
+            {
+
+                return $"Error: {ex.Message}";
+            }
+        }
         //TODO: Aquí encriptaremos el mensaje hacia el servidor.
         public static string ConstructServerMessage(string protocol, string action, List<string> dataToSend)
         {
@@ -89,8 +137,6 @@ namespace PruebaMauiAndroid.Models
 
 
         }
-
-
 
         public static Dictionary<string, string> ParseData(List<string> keys, string data)
         {
@@ -120,6 +166,8 @@ namespace PruebaMauiAndroid.Models
         }
 
 
+
+        //HANDLE RESPONSES & ACTIONS
         public static bool HandleResponse(string response)
         {
 
@@ -254,6 +302,8 @@ namespace PruebaMauiAndroid.Models
                     break;
                 case ServerLoginActions.LOGIN_FAILED:
                     Console.WriteLine("Handling LOGIN_FAILED");
+                    //NO HAY TOKEN DE MOMENTO ASI QUE.. return true;
+                    return true;
                     var retTokenFailed = ServerConnection.ParseData(["token"], data);
                     if (retTokenFailed.ContainsKey("token"))
                     { 
@@ -277,10 +327,12 @@ namespace PruebaMauiAndroid.Models
 
 
 
+        // DO ACTIONS
+
         public static async Task<bool> UserLogin(string user, string password)
         {
             ServerConnection.ConnectedUser = new(user);
-            string loginData = ServerConnection.ConstructServerMessage(((int)Protocol.LOGIN).ToString(),((int)ClientLoginActions.LOGIN).ToString() , [user, password]);
+            string loginData = ServerConnection.ConstructServerMessage(((int)Protocol.LOGIN).ToString(),((int)ClientLoginActions.LOGIN).ToString("D2") , [user, password]);
 
 
 
@@ -309,7 +361,7 @@ namespace PruebaMauiAndroid.Models
             if (!String.IsNullOrEmpty(ServerConnection.token))
             {
 
-                string dataToSend = ServerConnection.ConstructServerMessage(((int)Protocol.LOGIN).ToString(), ((int)ClientLoginActions.LOGOUT).ToString(), [ServerConnection.token, ConnectedUser.userName]);
+                string dataToSend = ServerConnection.ConstructServerMessage(((int)Protocol.LOGIN).ToString(), ((int)ClientLoginActions.LOGOUT).ToString("D2"), [ServerConnection.token, ConnectedUser.userName]);
                 string response = await SendDataAsync(dataToSend);
 
 
@@ -340,64 +392,9 @@ namespace PruebaMauiAndroid.Models
             return HandleResponse(response);
         }
 
-        public ServerConnection(string ip, int port)
-        {
-
-            ServerConnection.ip = ip;
-            ServerConnection.port = port;
-
-
-        }
-
-
-
-
-
-        public static async Task<string> SendDataAsync(string dataToSend, int timeoutMilliseconds = 5000)
-        {
-            try
-            {
-
-                using TcpClient tcpClient = new()
-                {
-                    NoDelay = true
-                };
-
-
-
-                using var cts = new CancellationTokenSource(timeoutMilliseconds);
-
-                Task connectTask = tcpClient.ConnectAsync(ip, port);
-                if (await Task.WhenAny(connectTask, Task.Delay(timeoutMilliseconds, cts.Token)) != connectTask)
-                {
-                    throw new TimeoutException("Se agotó el tiempo de espera.");
-                }
-
-                using NetworkStream networkStream = tcpClient.GetStream();
-                networkStream.WriteTimeout = timeoutMilliseconds;
-                networkStream.ReadTimeout = timeoutMilliseconds;
-
-                //Añadimos fin de linea para que el server pueda leer los datos
-                byte[] data = Encoding.UTF8.GetBytes(dataToSend + "\n");
-
-                await networkStream.WriteAsync(data, 0, data.Length);
-
-                await networkStream.FlushAsync();
-
-                byte[] responseBuffer = new byte[1024];
-                int bytesRead = await networkStream.ReadAsync(responseBuffer, 0, responseBuffer.Length, cts.Token);
-
-                string response = Encoding.UTF8.GetString(responseBuffer, 0, bytesRead);
-
-                
-                return response;
-            }
-            catch (Exception ex)
-            {
-
-                return $"Error: {ex.Message}";
-            }
-        }
+        
+        
+        
 
     }
 }

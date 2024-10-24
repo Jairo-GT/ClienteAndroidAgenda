@@ -13,7 +13,7 @@ public partial class MainPageUser : ContentPage
     {
 
 
-        var succes = await ServerConnection.userLogout();
+        var succes = await ServerConnection.UserLogout();
 
         if (succes)
         {

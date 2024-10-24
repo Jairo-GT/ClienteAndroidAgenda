@@ -28,7 +28,7 @@ Después:
     {
 
 
-        var succes = await ServerConnection.userLogout();
+        var succes = await ServerConnection.UserLogout();
 
         if (succes)
         {

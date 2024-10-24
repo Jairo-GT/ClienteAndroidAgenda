@@ -51,58 +51,7 @@
             </Label.FormattedText>
         </Label>
         
-        
-  <!--
-        <Label TextColor="FloralWhite" HorizontalTextAlignment="Center"  Margin="0,0,0,15">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span TextColor="FloralWhite" Text="¡Bienvenido a tu Agenda Personal!" FontSize="24" FontAttributes="Bold" />
-                    <Span TextColor="AntiqueWhite" Text="Organiza tu vida de manera fácil y eficiente. Con esta aplicación podrás:" FontSize="15" LineHeight="2"/>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
 
-        <Label TextColor="FloralWhite" HorizontalTextAlignment="Start" Margin="0,0,0,10">
-            <Label.FormattedText>
-                <FormattedString>
-                    <Span TextColor="AntiqueWhite"  Text="• Crear recordatorios" FontSize="16" FontAttributes="Bold" LineHeight="2"/>
-                    <Span TextColor="AntiqueWhite"  Text=" para que nunca olvides lo importante." FontSize="14" />
-
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-
-        <Label TextColor="FloralWhite" HorizontalTextAlignment="Start" Margin="0,0,0,10">
-            <Label.FormattedText>
-                <FormattedString>
-
-                    <Span TextColor="AntiqueWhite"  Text="• Tomar notas" FontSize="16" FontAttributes="Bold" LineHeight="2"/>
-                    <Span TextColor="AntiqueWhite"  Text=" rápidas y mantener tus ideas organizadas." FontSize="14" />
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-
-
-        <Label TextColor="FloralWhite" HorizontalTextAlignment="Start" Margin="0,0,0,10">
-            <Label.FormattedText>
-                <FormattedString>
-
-                    <Span TextColor="AntiqueWhite"  Text="• Planificar tus tareas diarias" FontSize="16" FontAttributes="Bold" LineHeight="2"/>
-                    <Span TextColor="AntiqueWhite"  Text=" para aprovechar al máximo tu tiempo." FontSize="14" />
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-
-
-        <Label TextColor="FloralWhite" HorizontalTextAlignment="Center" Margin="0,0,0,30">
-            <Label.FormattedText>
-                <FormattedString>
-
-                    <Span TextColor="AntiqueWhite"  Text="Inicia sesión y comienza a gestionar tu día a día con facilidad. ¡La organización nunca fue tan simple!" FontSize="14" LineHeight="2"/>
-                </FormattedString>
-            </Label.FormattedText>
-        </Label>
-  -->
    
     </VerticalStackLayout>
 </ContentView>

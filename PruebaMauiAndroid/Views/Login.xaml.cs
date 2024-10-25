@@ -1,44 +1,23 @@
 ﻿namespace PruebaMauiAndroid.Views;
 using LibraryClienteAgenda;
+using PruebaMauiAndroid.Models;
 using PruebaMauiAndroid.ViewModels;
+using System.Diagnostics;
 
 public partial class Login : ContentView
 {
 
-    readonly LoginViewModel viewModel;
+
+    public readonly LoginViewModel viewModel;
     public Login()
     {
         InitializeComponent();
-        viewModel = new LoginViewModel();
+        
+        viewModel = new(Navigation);
+        BindingContext = viewModel;
+        ServerConnection.SetupServerVars("10.0.2.2", 12522);
+        Debug.WriteLine(BindingContext?.GetType().Name ?? "BindingContext is null");
     }
 
 
-    //TODO: extraer la logica de datos al ViewModel
-    private async void LoginButton_Clicked(object sender, EventArgs e)
-    {
-
-        if (String.IsNullOrWhiteSpace(usernameEntry.Text) || String.IsNullOrWhiteSpace(passwordEntry.Text)) return;
-
-        string user = viewModel.sanetizeAndValidateUsername(usernameEntry.Text.Trim());
-        string password = viewModel.sanetizeAndValidatePassword(passwordEntry.Text.Trim());
-
-        var success = await ServerConnection.UserLogin(user, password);
-
-        usernameEntry.Text = "";
-        passwordEntry.Text = "";
-
-        if (success)
-        {
-            if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.IsAdmin == true)
-            {
-
-                await Navigation.PushModalAsync(new MainPageAdmin());
-            }
-
-
-            else { await Navigation.PushModalAsync(new MainPageUser()); }
-
-        }
-
-    }
 }

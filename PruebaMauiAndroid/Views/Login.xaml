@@ -2,10 +2,10 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:skia="clr-namespace:SkiaSharp.Extended.UI.Controls;assembly=SkiaSharp.Extended.UI"
-             x:Class="PruebaMauiAndroid.Views.Login" >
+             x:Class="PruebaMauiAndroid.Views.Login"
+             xmlns:viewModels ="clr-namespace:PruebaMauiAndroid.ViewModels"
+             >
 
-
-  
 
     <VerticalStackLayout Padding="10" VerticalOptions="Center">
 
@@ -19,13 +19,13 @@
 
 
         <!-- Nombre usuario-->
-        <Entry Placeholder="Usuario"  Keyboard="Plain"  TextColor="AntiqueWhite" x:Name="usernameEntry" />
+        <Entry Placeholder="Usuario" Text="{Binding UserName,Mode=TwoWay}"  Keyboard="Plain"  TextColor="AntiqueWhite" x:Name="usernameEntry" />
 
         <!-- Contraseña -->
-        <Entry Placeholder="Contraseña" IsPassword="True" TextColor="AntiqueWhite" x:Name="passwordEntry" />
+        <Entry Placeholder="Contraseña" Text="{Binding Password, Mode=TwoWay}" IsPassword="True" TextColor="AntiqueWhite" x:Name="passwordEntry" />
 
         <!-- Botón logear -->
-        <Button Text="Entrar" FontSize="18" FontAttributes="Bold"  Margin="0,0,0,5" x:Name="LoginButton" Clicked="LoginButton_Clicked"/>
+        <Button Text="Entrar" Command="{Binding LoginCommand}" FontSize="18" FontAttributes="Bold"  Margin="0,0,0,5" x:Name="LoginButton" />
 
         <Label TextColor="AntiqueWhite" FontSize="14">
             <Label.FormattedText>

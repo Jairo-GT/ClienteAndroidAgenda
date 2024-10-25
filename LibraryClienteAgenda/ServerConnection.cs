@@ -43,7 +43,7 @@ namespace LibraryClienteAgenda
     public enum ServerLoginActions
     {
         LOGIN_SUCCESS = 3,
-        LOGIN_FAILED = 2,
+        LOGOUT_SUCCESS = 2,
         RESET_PASSWORD_AFTER_LOGOUT = 4,
 
 
@@ -65,39 +65,39 @@ namespace LibraryClienteAgenda
         private static int port;
         private static string? token;
         private static UserInfo? connectedUser;
-        private static TcpClient? tcpClient;
+       
 
         public static string? Token { get => token; set => token = value; }
         public static UserInfo? ConnectedUser { get => connectedUser; set => connectedUser = value; }
-        public static TcpClient? TcpClient { get => tcpClient; set => tcpClient = value; }
+  
 
         //UTILITY & SETUP
 
-        public ServerConnection(string ip, int port, TcpClient? client = null)
+       
+        public static void SetupServerVars(string ip, int port)
         {
 
-            ServerConnection.ip = ip ?? "127.0.0.1";
+            ServerConnection.ip = ip;
             ServerConnection.port = port;
-            TcpClient = client ?? new TcpClient();
-
-
-
+           
         }
+
         public static async Task<string> SendDataAsync(string dataToSend, int timeoutMilliseconds = 5000)
         {
             try
             {
 
 
-                if (TcpClient == null) return "LA CONEXIÓN TCP ES NULL";
+
+                TcpClient tcpClient = new TcpClient() { NoDelay = true };
 
 
                 using var cts = new CancellationTokenSource(timeoutMilliseconds);
                 Task? connectTask = null;
 
-                if (!TcpClient.Connected)
+                if (!tcpClient.Connected)
                 {
-                    connectTask = TcpClient.ConnectAsync(ip, port);
+                    connectTask = tcpClient.ConnectAsync(ip, port);
                 }
 
 
@@ -106,7 +106,7 @@ namespace LibraryClienteAgenda
                     throw new TimeoutException("Se agotó el tiempo de espera.");
                 }
 
-                using NetworkStream networkStream = TcpClient.GetStream();
+                using NetworkStream networkStream = tcpClient.GetStream();
                 networkStream.WriteTimeout = timeoutMilliseconds;
                 networkStream.ReadTimeout = timeoutMilliseconds;
 
@@ -279,10 +279,19 @@ namespace LibraryClienteAgenda
 
                 case ServerUserActions.USER_INFO:
                     Console.WriteLine("Handling USER INFO");
-                    var dict = ParseData(["token", "user", "user2", "realName", "fecha"], data);
+                    var dict = ParseData(["token", "user", "user2","userRol", "realName", "dateBorn"], data);
                     //Falta el alias pero hay algo raro como numeros de más en el mensaje
-                    if(ConnectedUser != null) ConnectedUser.IsAdmin = data.Trim().LastOrDefault().ToString() == "1";
-                    return true;
+                    if (ConnectedUser != null)
+                    {
+                        ConnectedUser.IsAdmin = data.Trim().LastOrDefault().ToString() == "1";
+                        ConnectedUser.FullName = dict["realName"];
+                        ConnectedUser.DataNaixement = dict["dateBorn"];
+                        ConnectedUser.Userrol = dict["userRol"];
+                        ConnectedUser.UserToken = dict["token"];
+                    }
+                    else return false;
+                    
+                        return true;
 
                 default:
                     Console.WriteLine("Acción desconocida para USER");
@@ -311,8 +320,8 @@ namespace LibraryClienteAgenda
                         return true;
                     }
                     break;
-                case ServerLoginActions.LOGIN_FAILED:
-                    Console.WriteLine("Handling LOGIN_FAILED");
+                case ServerLoginActions.LOGOUT_SUCCESS:
+                    Console.WriteLine("Handling LOGOUT_SUCCESS");
                     //NO HAY TOKEN DE MOMENTO ASI QUE.. return true;
                     ServerConnection.Token = "";
                     ServerConnection.ConnectedUser = null;

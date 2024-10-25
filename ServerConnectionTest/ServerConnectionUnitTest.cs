@@ -6,7 +6,7 @@ namespace ServerConnectionTest
     public class ServerConnectionUnitTest
 
     {
-
+        //MOCK TEST
         //RESPUESTA DEL PROTOCOLO 1 CONEXIÓN/LOGIN MOCK
         [Fact]//103
         public void Handle_Login_Success_Response()
@@ -30,7 +30,7 @@ namespace ServerConnectionTest
 
         }
         [Fact]//102
-        public void Handle_Logout_Response()
+        public void Handle_Logout_Success_Response()
         {
 
 
@@ -58,7 +58,7 @@ namespace ServerConnectionTest
     
         //RESPUESTA DEL PROTOCOLO 2 USUARIO MOCK
         [Fact] //215
-        public void Handle_User_GetInfo_Admin_Response()
+        public void Handle_User_GetInfo_Admin_Success_Response()
         {
 
 
@@ -104,7 +104,18 @@ namespace ServerConnectionTest
            
 
         }
-        [Fact]
-        public void Handle__Response() { }
+        [Fact]//220
+        public void Handle_FullName_Changed_Success_Response() { }
+        [Fact]//221
+        public void Handle_DateBorn_Changed_Success_Response() { }
+        [Fact]//222
+        public void Handle_OtherData_Changed_Success_Response() { }
+
+        //RESPUESTA DEL PROTOCOLO 9 ERRORES MOCK
+
+        //INTEGRATION TEST
+        //RESPUESTA DEL PROTOCOLO 1 CONEXIÓN/LOGIN
+        //RESPUESTA DEL PROTOCOLO 2 USUARIO
+        //RESPUESTA DEL PROTOCOLO 9 ERRORES
     }
 }

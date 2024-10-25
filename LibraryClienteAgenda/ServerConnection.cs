@@ -69,11 +69,15 @@ namespace LibraryClienteAgenda
 
         public static string? Token { get => token; set => token = value; }
         public static UserInfo? ConnectedUser { get => connectedUser; set => connectedUser = value; }
-  
+
 
         //UTILITY & SETUP
-
-       
+        
+        /// <summary>
+        /// Sets up the server IP address and port number for the connection.
+        /// </summary>
+        /// <param name="ip">The IP address of the server.</param>
+        /// <param name="port">The port number of the server.</param>
         public static void SetupServerVars(string ip, int port)
         {
 
@@ -82,6 +86,11 @@ namespace LibraryClienteAgenda
            
         }
 
+        /// <summary>
+        /// Envia una petición al servidor y espera una respuesta.
+        /// </summary>
+        /// <param name="dataToSend">Los petición al servidor.</param>
+        /// <param name="timeoutMilliseconds">El tiempo de espera a un mensaje de respuesta o se cancela la tarea.</param>
         public static async Task<string> SendDataAsync(string dataToSend, int timeoutMilliseconds = 5000)
         {
             try
@@ -131,8 +140,15 @@ namespace LibraryClienteAgenda
                 return $"Error: {ex.Message}";
             }
         }
-        //TODO: Aquí encriptaremos el mensaje hacia el servidor.
-        public static string AssembleServerMessage(string protocol, string action, List<string> dataToSend)
+
+        /// <summary>
+        /// Ensambla un mensaje de petición al servidor.
+        /// </summary>
+        /// <param name="protocol">El protocolo del mensaje.</param>
+        /// <param name="action">La acción de la petición al servidor.</param>
+        /// <param name="dataToSend">Los datos extras a enviar de manera secuencial en una List<string>.</param>
+        /// <param name="encrypt">Si el mensaje al servidor debe estar encriptado.</param>
+        public static string AssembleServerMessage(string protocol, string action, List<string> dataToSend, bool encrypt = false)
         {
             string message = protocol + action;
 
@@ -149,6 +165,11 @@ namespace LibraryClienteAgenda
 
         }
 
+        /// <summary>
+        /// Devuelve un diccionario con los datos parseados de una respuesta de servidor.
+        /// </summary>
+        /// <param name="keys">Las keys del diccionario devuelto despues de extraer los datos. Los extrae de manera secuencial.</param>
+        /// <param name="data">Los datos a extraer formados por un offset que marca el tamaño y el dato en si en una String.</param>
         public static Dictionary<string, string> ParseData(List<string> keys, string data)
         {
 
@@ -176,9 +197,12 @@ namespace LibraryClienteAgenda
 
         }
 
-
-
         //HANDLE RESPONSES & ACTIONS
+        /// <summary>
+        /// Procesa una respuesta de servidor.
+        /// </summary>
+        /// <param name="response">La respuesta del servidor.</param>
+        /// <returns>True si la respuesta es exitosa, False si hubo algun fallo o error.</returns>
         public static bool HandleResponse(string response)
         {
             string data;
@@ -229,6 +253,12 @@ namespace LibraryClienteAgenda
 
         }
 
+        /// <summary>
+        /// Procesa una acción del protocolo de servidor de ERROR.
+        /// </summary>
+        /// <param name="serverAction">La acción a confirmar.</param>
+        /// <param name="data">Los datos de la respuesta del servidor.</param>
+        /// <returns>La respuesta, siempre devuelve True.</returns>
         private static bool HandleServerErrorActions(ServerErrorActions serverAction, string data)
         {
 
@@ -268,9 +298,15 @@ namespace LibraryClienteAgenda
                     break;
             }
 
-            return false;
+            return true;
         }
 
+        /// <summary>
+        /// Procesa una acción del protocolo de servidor de USER.
+        /// </summary>
+        /// <param name="serverAction">La acción a confirmar.</param>
+        /// <param name="data">Los datos de la respuesta del servidor.</param>
+        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
         private static bool HandleServerUserActions(ServerUserActions serverAction, string data)
         {
 
@@ -302,7 +338,13 @@ namespace LibraryClienteAgenda
 
 
         }
-
+        
+        /// <summary>
+        /// Procesa una acción del protocolo de servidor de LOGIN.
+        /// </summary>
+        /// <param name="serverAction">La acción a confirmar.</param>
+        /// <param name="data">Los datos de la respuesta del servidor.</param>
+        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
         private static bool HandleServerLoginActions(ServerLoginActions serverAction, string data)
         {
 
@@ -337,7 +379,12 @@ namespace LibraryClienteAgenda
 
 
         // DO ACTIONS
-
+        /// <summary>
+        /// Método para autenticarse en el servidor.
+        /// </summary>
+        /// <param name="user">El nombre de usuario.</param>
+        /// <param name="password">La contraseña.</param>
+        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
         public static async Task<bool> UserLogin(string user, string password)
         {
             ServerConnection.ConnectedUser = new(user);
@@ -362,6 +409,11 @@ namespace LibraryClienteAgenda
             return isValidResponse;
         }
 
+
+        /// <summary>
+        /// Método para deautenticarse en el servidor. Requiere un usuario autenticado.
+        /// </summary>
+        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
         public static async Task<bool> UserLogout()
         {
 
@@ -386,6 +438,11 @@ namespace LibraryClienteAgenda
             return false;
         }
 
+
+        /// <summary>
+        /// Obtiene los datos de un usuario y los guarda en el campo ConnectedUser. Requiere un usuario autenticado.
+        /// </summary>
+        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
         public static async Task<bool> GetUserInfo()
         {
 

@@ -1,4 +1,5 @@
 using LibraryClienteAgenda;
+using System.Diagnostics.Tracing;
 
 namespace ServerConnectionTest
 {
@@ -67,14 +68,15 @@ namespace ServerConnectionTest
 
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
 
-            List<string> data = [token, "NombreUsuario", "NombreUsuario2", "NombreReal", "FechaAlta"];
+            List<string> data = [token, "user", "user2", "userRol", "realName", "dateBorn"];
 
             var responseMessage = protocol + action;
             foreach (var entry in data)
             {
 
-                responseMessage += entry.Length.ToString("D2") + entry;
+                responseMessage += string.Format("{0:D2}", entry.Length) + entry;
             }
+            Console.WriteLine(responseMessage);
 
             responseMessage += "1";  //Es admin
             var user = "user";

@@ -1,6 +1,4 @@
 ﻿using LibraryClienteAgenda;
-using Microsoft.Maui.Controls;
-using PruebaMauiAndroid.Models;
 using PruebaMauiAndroid.Views;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -87,12 +85,15 @@ namespace PruebaMauiAndroid.ViewModels
             string password = sanetizeAndValidatePassword(Password);
 
             var success = await ServerConnection.UserLogin(user, password);
-
-            UserName= "";
             Password = "";
+
+
+          
+          
 
             if (success)
             {
+                UserName = "";
                 if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.IsAdmin == true)
                 {
 

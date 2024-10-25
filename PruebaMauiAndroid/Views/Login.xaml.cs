@@ -1,6 +1,5 @@
 ﻿namespace PruebaMauiAndroid.Views;
 using LibraryClienteAgenda;
-using PruebaMauiAndroid.Models;
 using PruebaMauiAndroid.ViewModels;
 using System.Diagnostics;
 

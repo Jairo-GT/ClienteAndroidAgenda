@@ -1,7 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using PruebaMauiAndroid.Models;
-using PruebaMauiAndroid.ViewModels;
-using PruebaMauiAndroid.Views;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
 namespace PruebaMauiAndroid

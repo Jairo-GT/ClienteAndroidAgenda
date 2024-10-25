@@ -1,4 +1,4 @@
-﻿namespace PruebaMauiAndroid
+﻿namespace ClienteAndroidAgenda
 {
     public partial class App : Application
     {

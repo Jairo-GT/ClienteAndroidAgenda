@@ -1,6 +1,6 @@
 using LibraryClienteAgenda;
 
-namespace PruebaMauiAndroid.Views;
+namespace ClienteAndroidAgenda.Views;
 
 public partial class MainPageUser : ContentPage
 {

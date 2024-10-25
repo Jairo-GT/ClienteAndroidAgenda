@@ -1,10 +1,10 @@
 ﻿using LibraryClienteAgenda;
-using PruebaMauiAndroid.Views;
+using ClienteAndroidAgenda.Views;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 
-namespace PruebaMauiAndroid.ViewModels
+namespace ClienteAndroidAgenda.ViewModels
 {
     public class LoginViewModel : INotifyPropertyChanged
     {

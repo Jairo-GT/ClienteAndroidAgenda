@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 
-namespace PruebaMauiAndroid
+namespace ClienteAndroidAgenda
 {
     public static class MauiProgram
     {

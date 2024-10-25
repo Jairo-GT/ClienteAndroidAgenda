@@ -1,6 +1,6 @@
 ﻿using LibraryClienteAgenda;
 
-namespace PruebaMauiAndroid.Views;
+namespace ClienteAndroidAgenda.Views;
 
 public partial class MainPageAdmin : ContentPage
 {
@@ -16,7 +16,7 @@ public partial class MainPageAdmin : ContentPage
     }
 
 
-    /* Cambio no fusionado mediante combinación del proyecto 'PruebaMauiAndroid (net8.0-android)'
+    /* Cambio no fusionado mediante combinación del proyecto 'ClienteAndroidAgenda (net8.0-android)'
     Antes:
         private void Button_Clicked(object sender, EventArgs e)
         {

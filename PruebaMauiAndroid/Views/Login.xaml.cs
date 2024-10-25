@@ -1,6 +1,6 @@
-﻿namespace PruebaMauiAndroid.Views;
+﻿namespace ClienteAndroidAgenda.Views;
 using LibraryClienteAgenda;
-using PruebaMauiAndroid.ViewModels;
+using ClienteAndroidAgenda.ViewModels;
 using System.Diagnostics;
 
 public partial class Login : ContentView

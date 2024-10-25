@@ -1,4 +1,6 @@
-﻿namespace PruebaMauiAndroid
+﻿using Microsoft.Maui.Controls;
+
+namespace ClienteAndroidAgenda
 {
     public partial class MainPage : ContentPage
     {

@@ -1,16 +1,11 @@
 ﻿namespace PruebaMauiAndroid.Views;
-using System.Threading.Tasks;
-using System.Net.Http;
-using PruebaMauiAndroid.Models;
+using LibraryClienteAgenda;
 using PruebaMauiAndroid.ViewModels;
 
 public partial class Login : ContentView
 {
 
-    //IP para conectar al server local en emulador android (no android studio)
-    private ServerConnection serverConnection = new ServerConnection("10.0.2.2", 12522);
-
-    LoginViewModel viewModel;
+    readonly LoginViewModel viewModel;
     public Login()
     {
         InitializeComponent();
@@ -34,7 +29,7 @@ public partial class Login : ContentView
 
         if (success)
         {
-            if (ServerConnection.ConnectedUser.isAdmin == true)
+            if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.IsAdmin == true)
             {
 
                 await Navigation.PushModalAsync(new MainPageAdmin());

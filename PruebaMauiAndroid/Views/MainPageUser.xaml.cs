@@ -1,13 +1,13 @@
-using PruebaMauiAndroid.Models;
+using LibraryClienteAgenda;
 
 namespace PruebaMauiAndroid.Views;
 
 public partial class MainPageUser : ContentPage
 {
-	public MainPageUser()
-	{
-		InitializeComponent();
-	}
+    public MainPageUser()
+    {
+        InitializeComponent();
+    }
 
     private async void Button_ClickedAsync(object sender, EventArgs e)
     {

@@ -64,6 +64,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ProjectReference Include="..\LibraryClienteAgenda\LibraryClienteAgenda.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <Resource Include="Resources\Raw\LoginLottie.json" />
 	</ItemGroup>
 

@@ -4,7 +4,12 @@ using System.Text;
 
 namespace LibraryClienteAgenda
 {
-
+    public enum ResponseStatus
+    {
+        ACTION_SUCCESS = 1,
+        ACTION_FAILED = 2,
+        ACTION_ERROR = 3
+    }
     public enum Protocol
     {
         LOGIN = 1,
@@ -202,8 +207,8 @@ namespace LibraryClienteAgenda
         /// Procesa una respuesta de servidor.
         /// </summary>
         /// <param name="response">La respuesta del servidor.</param>
-        /// <returns>True si la respuesta es exitosa, False si hubo algun fallo o error.</returns>
-        public static bool HandleResponse(string response)
+        /// <returns>Devuelve un ResponseStatus con SUCCES,FAILED,ERROR segun si la acción tuvo éxito,falló o devolvió un mensaje de error/denegación. </returns>
+        public static ResponseStatus HandleResponse(string response)
         {
             string data;
 
@@ -249,7 +254,7 @@ namespace LibraryClienteAgenda
                     break;
             }
 
-            return false;
+            return ResponseStatus.ACTION_FAILED;
 
         }
 
@@ -258,8 +263,8 @@ namespace LibraryClienteAgenda
         /// </summary>
         /// <param name="serverAction">La acción a confirmar.</param>
         /// <param name="data">Los datos de la respuesta del servidor.</param>
-        /// <returns>La respuesta, siempre devuelve True.</returns>
-        private static bool HandleServerErrorActions(ServerErrorActions serverAction, string data)
+        /// <returns>Devuelve un ResponseStatus con ERROR o FAILED si la acción no fue gestionada. </returns>
+        private static ResponseStatus HandleServerErrorActions(ServerErrorActions serverAction, string data)
         {
 
             switch (serverAction)
@@ -295,10 +300,11 @@ namespace LibraryClienteAgenda
 
                 default:
                     Console.WriteLine("Acción desconocida para ERROR_RESPONSES");
-                    break;
+                    return ResponseStatus.ACTION_FAILED;
+                    
             }
 
-            return true;
+            return ResponseStatus.ACTION_ERROR;
         }
 
         /// <summary>
@@ -306,8 +312,8 @@ namespace LibraryClienteAgenda
         /// </summary>
         /// <param name="serverAction">La acción a confirmar.</param>
         /// <param name="data">Los datos de la respuesta del servidor.</param>
-        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
-        private static bool HandleServerUserActions(ServerUserActions serverAction, string data)
+        /// <returns>Devuelve un ResponseStatus con SUCCES si tuvo éxito o FAILED si la acción no fue gestionada.</returns>
+        private static ResponseStatus HandleServerUserActions(ServerUserActions serverAction, string data)
         {
 
             switch (serverAction)
@@ -325,16 +331,16 @@ namespace LibraryClienteAgenda
                         ConnectedUser.Userrol = dict["userRol"];
                         ConnectedUser.UserToken = dict["token"];
                     }
-                    else return false;
+                    else return ResponseStatus.ACTION_FAILED;
                     
-                        return true;
+                        return ResponseStatus.ACTION_SUCCESS;
 
                 default:
                     Console.WriteLine("Acción desconocida para USER");
                     break;
             }
 
-            return false;
+            return ResponseStatus.ACTION_FAILED;
 
 
         }
@@ -344,8 +350,8 @@ namespace LibraryClienteAgenda
         /// </summary>
         /// <param name="serverAction">La acción a confirmar.</param>
         /// <param name="data">Los datos de la respuesta del servidor.</param>
-        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
-        private static bool HandleServerLoginActions(ServerLoginActions serverAction, string data)
+        /// <returns>Devuelve un ResponseStatus con SUCCES si tuvo éxito o FAILED si la acción no fue gestionada.</returns>
+        private static ResponseStatus HandleServerLoginActions(ServerLoginActions serverAction, string data)
         {
 
 
@@ -359,21 +365,24 @@ namespace LibraryClienteAgenda
 
                         System.Console.WriteLine("TOKEN OBTAINED: " + value);
                         Token = value;
-                        return true;
+
                     }
+                    else 
+                        return ResponseStatus.ACTION_FAILED;
                     break;
                 case ServerLoginActions.LOGOUT_SUCCESS:
                     Console.WriteLine("Handling LOGOUT_SUCCESS");
                     //NO HAY TOKEN DE MOMENTO ASI QUE.. return true;
                     ServerConnection.Token = "";
                     ServerConnection.ConnectedUser = null;
-                    return true;            
+                    break;           
                 default:
                     Console.WriteLine("Acción desconocida para LOGIN");
-                    break;
+                    return ResponseStatus.ACTION_FAILED;
             }
 
-            return false;
+            return ResponseStatus.ACTION_SUCCESS;
+
         }
 
 
@@ -385,7 +394,7 @@ namespace LibraryClienteAgenda
         /// <param name="user">El nombre de usuario.</param>
         /// <param name="password">La contraseña.</param>
         /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
-        public static async Task<bool> UserLogin(string user, string password)
+        public static async Task<ResponseStatus> UserLogin(string user, string password)
         {
             ServerConnection.ConnectedUser = new(user);
             string loginData = ServerConnection.AssembleServerMessage(((int)Protocol.LOGIN).ToString(), ((int)ClientLoginActions.LOGIN).ToString("D2"), [user, password]);
@@ -400,7 +409,7 @@ namespace LibraryClienteAgenda
             var isValidResponse = HandleResponse(response);
 
 
-            if (isValidResponse)
+            if (isValidResponse == ResponseStatus.ACTION_SUCCESS)
             {
                 await GetUserInfo();
             }
@@ -414,7 +423,7 @@ namespace LibraryClienteAgenda
         /// Método para deautenticarse en el servidor. Requiere un usuario autenticado.
         /// </summary>
         /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
-        public static async Task<bool> UserLogout()
+        public static async Task<ResponseStatus> UserLogout()
         {
 
 
@@ -435,7 +444,7 @@ namespace LibraryClienteAgenda
             }
 
 
-            return false;
+            return ResponseStatus.ACTION_FAILED;
         }
 
 
@@ -443,13 +452,13 @@ namespace LibraryClienteAgenda
         /// Obtiene los datos de un usuario y los guarda en el campo ConnectedUser. Requiere un usuario autenticado.
         /// </summary>
         /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
-        public static async Task<bool> GetUserInfo()
+        public static async Task<ResponseStatus> GetUserInfo()
         {
 
             if (String.IsNullOrEmpty(ServerConnection.Token) || ConnectedUser == null )
             {
                 Console.WriteLine("GetuserInfo: El Token o Usuario conectado no son válidos.");
-                return false;
+                return ResponseStatus.ACTION_FAILED;
 
             }
 

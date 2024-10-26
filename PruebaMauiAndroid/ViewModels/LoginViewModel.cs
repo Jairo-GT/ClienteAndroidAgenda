@@ -91,7 +91,7 @@ namespace ClienteAndroidAgenda.ViewModels
           
           
 
-            if (success)
+            if (success == ResponseStatus.ACTION_SUCCESS)
             {
                 UserName = "";
                 if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.IsAdmin == true)

@@ -18,10 +18,10 @@ namespace ServerConnectionTest
             var user = "user";
 
             ServerConnection.ConnectedUser = new(user);
-            bool success = ServerConnection.HandleResponse(responseMessage);
+            ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
 
             //Simulamos que hemos enviado un mensaje correcto, y recibido la respuesta que toca.
-            Assert.True(success);
+            Assert.True(success==ResponseStatus.ACTION_SUCCESS);
             Assert.Equal(token, ServerConnection.Token);
             Assert.Equal(user, ServerConnection.ConnectedUser.UserName);
 
@@ -40,10 +40,10 @@ namespace ServerConnectionTest
             ServerConnection.Token = token;
 
 
-            bool success = ServerConnection.HandleResponse(responseMessage);
+            ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
 
             //Simulamos que hemos enviado un mensaje correcto, y recibido la respuesta que toca.
-            Assert.True(success);
+            Assert.True(success == ResponseStatus.ACTION_SUCCESS);
             Assert.Empty(ServerConnection.Token);
             Assert.Null(ServerConnection.ConnectedUser);
 
@@ -78,10 +78,10 @@ namespace ServerConnectionTest
             ServerConnection.Token = token;
 
 
-            bool success = ServerConnection.HandleResponse(responseMessage);
+            ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
             //TODO: Saber cual es el user principal 1 o 2 y hacer comprobación también.
             //Simulamos que hemos enviado un mensaje correcto, y los datos pertinentes han cambiado.
-            Assert.True(success);
+            Assert.True(success==ResponseStatus.ACTION_SUCCESS);
             Assert.True(ServerConnection.ConnectedUser.IsAdmin);
             Assert.Equal(token, ServerConnection.Token);
             Assert.Equal(ServerConnection.ConnectedUser.UserName, user);
@@ -102,10 +102,6 @@ namespace ServerConnectionTest
 
         #region Protocol 9: Error Responses Tests
         #endregion
-
-
-
-
 
         #region Helper Methods
 

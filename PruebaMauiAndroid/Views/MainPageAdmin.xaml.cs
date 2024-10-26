@@ -30,7 +30,7 @@ public partial class MainPageAdmin : ContentPage
 
         var succes = await ServerConnection.UserLogout();
 
-        if (succes)
+        if (succes==ResponseStatus.ACTION_SUCCESS)
         {
             await Navigation.PopModalAsync();
             //await App.Current.MainPage.DisplayAlert("info", "Closing session", "OK");

@@ -6,18 +6,15 @@ namespace ServerConnectionTest
     public class ServerConnectionUnitTest
 
     {
-        //MOCK TEST
-        //RESPUESTA DEL PROTOCOLO 1 CONEXIÓN/LOGIN MOCK
+        #region Protocol 1: Connection/Login Mock Tests
         [Fact]//103
         public void Handle_Login_Success_Response()
         {
 
 
             //Protocol (1byte)  + action (2bytes) + sizeToken(2 bytes) + Token (always 36 bytes)
-            var protocol = "1";
-            var action = "03";
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
-            var responseMessage = protocol + action + token.Length + token;
+            var responseMessage = BuildResponseMessage("1", "03", [token]);
             var user = "user";
 
             ServerConnection.ConnectedUser = new(user);
@@ -35,10 +32,8 @@ namespace ServerConnectionTest
 
 
             //Protocol (1byte)  + action (2bytes) + sizeToken(2 bytes) + Token (always 36 bytes)
-            var protocol = "1";
-            var action = "02";
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
-            var responseMessage = protocol + action + token.Length + token;
+            var responseMessage = BuildResponseMessage("1", "02", [token]);
             var user = "user";
 
             ServerConnection.ConnectedUser = new(user);
@@ -53,18 +48,19 @@ namespace ServerConnectionTest
             Assert.Null(ServerConnection.ConnectedUser);
 
         }
-        [Fact]//104
+        [Fact(Skip = "No implementado")] //104
         public void Handle_ChangePassword_After_Logout_Response() { }
-    
-        //RESPUESTA DEL PROTOCOLO 2 USUARIO MOCK
+
+
+        #endregion
+
+        #region Protocol 2: User Info Mock Tests
         [Fact] //215
         public void Handle_User_GetInfo_Admin_Success_Response()
         {
 
 
             //Protocol (1byte)  + action (2bytes) + sizeToken(2 bytes) + Token (always 36 bytes)
-            var protocol = "2";
-            var action = "15";
 
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
             var user = "user";
@@ -72,28 +68,19 @@ namespace ServerConnectionTest
             var rol = "userRol";
             var realName = "realName";
             var dateBorn = "dateBorn";
+            var extraData = "No hay datos extras";
 
-            List<string> data = [token, user, user2, "userRol", "realName", "dateBorn"];
-
-            var responseMessage = protocol + action;
-            foreach (var entry in data)
-            {
-
-                responseMessage += string.Format("{0:D2}", entry.Length) + entry;
-            }
+            var responseMessage = BuildUserInfoResponseMessage("2", "15", token, user, user2, rol, realName, dateBorn, extraData, isAdmin: true);
             Console.WriteLine(responseMessage);
 
-            responseMessage += "1";  //Es admin
-            
-
+            //El usuario esta logeado asi que debería tener el token y su nombre asignados correctamente.
             ServerConnection.ConnectedUser = new(user);
-
             ServerConnection.Token = token;
 
 
             bool success = ServerConnection.HandleResponse(responseMessage);
-            //TODO: Saber cual es el user principal 1 o 2 y hacer comprobación también.  Y faltaria el campo extra de 4 bytes pero no tengo muy claro aún para que es.
-            //Simulamos que hemos enviado un mensaje correcto, y recibido la respuesta que toca.
+            //TODO: Saber cual es el user principal 1 o 2 y hacer comprobación también.
+            //Simulamos que hemos enviado un mensaje correcto, y los datos pertinentes han cambiado.
             Assert.True(success);
             Assert.True(ServerConnection.ConnectedUser.IsAdmin);
             Assert.Equal(token, ServerConnection.Token);
@@ -104,18 +91,54 @@ namespace ServerConnectionTest
            
 
         }
-        [Fact]//220
+        [Fact(Skip = "No implementado")] //220
         public void Handle_FullName_Changed_Success_Response() { }
-        [Fact]//221
+        [Fact(Skip = "No implementado")] //221
         public void Handle_DateBorn_Changed_Success_Response() { }
-        [Fact]//222
+        [Fact(Skip = "No implementado")] //222
         public void Handle_OtherData_Changed_Success_Response() { }
 
+        #endregion
         //RESPUESTA DEL PROTOCOLO 9 ERRORES MOCK
 
         //INTEGRATION TEST
         //RESPUESTA DEL PROTOCOLO 1 CONEXIÓN/LOGIN
         //RESPUESTA DEL PROTOCOLO 2 USUARIO
         //RESPUESTA DEL PROTOCOLO 9 ERRORES
+
+
+        #region Helper Methods
+
+        private static string BuildResponseMessage(string protocol, string action, List<string> data)
+        {
+
+            string response = protocol + action;
+            foreach(var entry in data)
+            {
+                response += $"{entry.Length:D2}{entry}";
+
+            }
+
+            return response;
+        }
+
+        private static string BuildUserInfoResponseMessage(string protocol, string action, string token, string user, string user2, string role, string realName, string dateBorn,string extraData, bool isAdmin)
+        {
+            var data = new List<string> { token, user, user2, role, realName, dateBorn };
+            var responseMessage = BuildResponseMessage(protocol, action, data);
+
+            foreach (var entry in data)
+            {
+                responseMessage += $"{entry.Length:D4}{entry}";
+            }
+
+            responseMessage += isAdmin ? "1" : "0";
+            return responseMessage;
+        }
+
+        #endregion
+
     }
+
+
 }

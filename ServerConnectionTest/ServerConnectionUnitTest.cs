@@ -6,7 +6,7 @@ namespace ServerConnectionTest
     public class ServerConnectionUnitTest
 
     {
-        #region Protocol 1: Connection/Login Mock Tests
+        #region Protocol 1: Connection/Login Responses Tests
         [Fact]//103
         public void Handle_Login_Success_Response()
         {
@@ -54,7 +54,7 @@ namespace ServerConnectionTest
 
         #endregion
 
-        #region Protocol 2: User Info Mock Tests
+        #region Protocol 2: User Info Responses Tests
         [Fact] //215
         public void Handle_User_GetInfo_Admin_Success_Response()
         {
@@ -99,12 +99,12 @@ namespace ServerConnectionTest
         public void Handle_OtherData_Changed_Success_Response() { }
 
         #endregion
-        //RESPUESTA DEL PROTOCOLO 9 ERRORES MOCK
 
-        //INTEGRATION TEST
-        //RESPUESTA DEL PROTOCOLO 1 CONEXIÓN/LOGIN
-        //RESPUESTA DEL PROTOCOLO 2 USUARIO
-        //RESPUESTA DEL PROTOCOLO 9 ERRORES
+        #region Protocol 9: Error Responses Tests
+        #endregion
+
+
+
 
 
         #region Helper Methods

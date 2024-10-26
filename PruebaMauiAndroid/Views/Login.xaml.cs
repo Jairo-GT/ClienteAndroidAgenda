@@ -15,7 +15,7 @@ public partial class Login : ContentView
         viewModel = new(Navigation);
         BindingContext = viewModel;
         ServerConnection.SetupServerVars("10.0.2.2", 12522);
-        Debug.WriteLine(BindingContext?.GetType().Name ?? "BindingContext is null");
+       
     }
 
 

@@ -76,8 +76,8 @@ namespace LibraryClienteAgenda
         public static UserInfo? ConnectedUser { get => connectedUser; set => connectedUser = value; }
 
 
-        //UTILITY & SETUP
-        
+        #region HELPERS & SETUP
+
         /// <summary>
         /// Sets up the server IP address and port number for the connection.
         /// </summary>
@@ -334,7 +334,7 @@ namespace LibraryClienteAgenda
                     else return ResponseStatus.ACTION_FAILED;
                     
                         return ResponseStatus.ACTION_SUCCESS;
-
+            
                 default:
                     Console.WriteLine("Acción desconocida para USER");
                     break;
@@ -385,9 +385,11 @@ namespace LibraryClienteAgenda
 
         }
 
+        #endregion
 
 
-        // DO ACTIONS
+
+        #region SERVER ACTIONS
         /// <summary>
         /// Método para autenticarse en el servidor.
         /// </summary>
@@ -475,5 +477,32 @@ namespace LibraryClienteAgenda
             return HandleResponse(response);
         }
 
+
+
+        /// <summary>
+        /// Obtiene los datos de un usuario y los guarda en el campo ConnectedUser. Requiere un usuario autenticado.
+        /// </summary>
+        ///<param name="newPassword">La nueva contraseña.</param>
+        ///<param name="oldPassword">La antigua contraseña.</param>
+        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
+        public static async Task<ResponseStatus> ChangeUserPassword(string newPassword,string oldPassword) {
+
+            if (String.IsNullOrEmpty(ServerConnection.Token) || ConnectedUser == null)
+            {
+                Console.WriteLine("GetuserInfo: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+            string changePasswordMessage = AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.CHANGE_PASSWORD).ToString("D2"), [ServerConnection.token,ConnectedUser.UserName,oldPassword,newPassword,ConnectedUser.UserName]);
+            string response = await SendDataAsync(changePasswordMessage);
+
+
+
+
+            return HandleResponse(response);
+        }
+
+        #endregion
     }
 }

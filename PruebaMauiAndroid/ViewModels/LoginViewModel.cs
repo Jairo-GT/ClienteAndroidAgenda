@@ -21,6 +21,18 @@ namespace ClienteAndroidAgenda.ViewModels
                 }
             }
         }
+
+        public Visibility LoginVisibility
+        {
+            get
+            {
+                if (IsLoginVisible)
+                    return Visibility.Collapsed;
+                else
+                    return Visibility.Visible;
+            }
+
+        }
         private string? _password;
         public string? Password
         {
@@ -34,7 +46,21 @@ namespace ClienteAndroidAgenda.ViewModels
                 }
             }
         }
-   
+        public bool IsLoginVisible => !IsLoading;
+        private bool isLoading;
+        public bool IsLoading
+        {
+            get => isLoading;
+            set
+            {
+                isLoading = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(IsLoginVisible));
+                OnPropertyChanged(nameof(LoginVisibility));
+            }
+        }
+
+
 
         //Falta que  quedemos en algunas pautas de tamaño,caracters permitidos..
         public string sanetizeAndValidateUsername(string username)
@@ -76,7 +102,7 @@ namespace ClienteAndroidAgenda.ViewModels
 
         private async Task LoginAsync(INavigation nav)
         {
-
+            IsLoading = true;
           
 
             if (String.IsNullOrWhiteSpace(UserName) || String.IsNullOrWhiteSpace(Password)) return;
@@ -87,9 +113,9 @@ namespace ClienteAndroidAgenda.ViewModels
             var success = await ServerConnection.UserLogin(user, password);
             Password = "";
 
+            //Simulamos espera
+            await Task.Delay(4000);
 
-          
-          
 
             if (success == ResponseStatus.ACTION_SUCCESS)
             {
@@ -97,15 +123,21 @@ namespace ClienteAndroidAgenda.ViewModels
                 if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.IsAdmin == true)
                 {
 
-                    await nav.PushModalAsync(new MainPageAdmin());
+                    var adminPage = new NavigationPage(new MainPageAdmin());
+                    NavigationPage.SetHasBackButton(adminPage.CurrentPage, false);
+                    await nav.PushModalAsync(adminPage);
                 }
 
 
-                else { await nav.PushModalAsync(new MainPageUser()); }
+                else {
+                    var userPage = new NavigationPage(new MainPageUser());
+                    NavigationPage.SetHasBackButton(userPage.CurrentPage, false);
+                    await nav.PushModalAsync(userPage);
+                }
 
             }
 
-            await Task.Delay(2000);
+            IsLoading = false;
         }
     }
 }

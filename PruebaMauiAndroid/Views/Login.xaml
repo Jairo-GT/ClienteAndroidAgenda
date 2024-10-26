@@ -9,25 +9,36 @@
 
     <VerticalStackLayout Padding="10" VerticalOptions="Center">
 
-        <Label HorizontalOptions="Center" TextColor="AntiqueWhite" FontSize="24" FontAttributes="Bold">AGENDA</Label>
+        <Label  IsEnabled="{Binding IsLoginVisible}" IsVisible="{Binding LoginVisibility}" HorizontalOptions="Center" TextColor="AntiqueWhite" FontSize="24" FontAttributes="Bold">AGENDA</Label>
 
         <skia:SKLottieView RepeatCount="-1"
                    RepeatMode="Restart"
-                   Source="waiting.json"
+                   Source="WaitingBlue.json"
                    HeightRequest="250"
                    WidthRequest="250" />
+<!--
+        <ActivityIndicator 
+            IsRunning="{Binding IsLoading}" 
+            IsVisible="{Binding IsLoading}" 
+            Color="Blue"
+            HorizontalOptions="Center"
+            VerticalOptions="Center" />
+
+-->
+        <Label IsVisible="{Binding IsLoading}"  HorizontalOptions="Center" TextColor="AntiqueWhite" FontSize="17" Text="Tu información se está procesando." />
+        <Label IsVisible="{Binding IsLoading}"  HorizontalOptions="Center" TextColor="AntiqueWhite" FontSize="17" Text="Un momento, por favor." />
 
 
         <!-- Nombre usuario-->
-        <Entry Placeholder="Usuario" Text="{Binding UserName,Mode=TwoWay}"  Keyboard="Plain"  TextColor="AntiqueWhite" x:Name="usernameEntry" />
+        <Entry Placeholder="Usuario" IsEnabled="{Binding IsLoginVisible}" IsVisible="{Binding LoginVisibility}" Text="{Binding UserName,Mode=TwoWay}"  Keyboard="Plain"  TextColor="AntiqueWhite" x:Name="usernameEntry" />
 
         <!-- Contraseña -->
-        <Entry Placeholder="Contraseña" Text="{Binding Password, Mode=TwoWay}" IsPassword="True" TextColor="AntiqueWhite" x:Name="passwordEntry" />
+        <Entry Placeholder="Contraseña" IsEnabled="{Binding IsLoginVisible}" IsVisible="{Binding LoginVisibility}" Text="{Binding Password, Mode=TwoWay}" IsPassword="True" TextColor="AntiqueWhite" x:Name="passwordEntry" />
 
         <!-- Botón logear -->
-        <Button Text="Entrar" Command="{Binding LoginCommand}" FontSize="18" FontAttributes="Bold"  Margin="0,0,0,5" x:Name="LoginButton" />
+            <Button Text="Entrar"  IsEnabled="{Binding IsLoginVisible}" IsVisible="{Binding LoginVisibility}" Command="{Binding LoginCommand}" FontSize="18" FontAttributes="Bold"  Margin="0,0,0,5" x:Name="LoginButton" />
 
-        <Label TextColor="AntiqueWhite" FontSize="14">
+        <Label TextColor="AntiqueWhite" FontSize="14" IsEnabled="{Binding IsLoginVisible}" IsVisible="{Binding LoginVisibility}">
             <Label.FormattedText>
                 <FormattedString>
                     <Span TextColor="AntiqueWhite"  Text="¿Aún no tienes cuenta?" />
@@ -38,7 +49,7 @@
         </Label>
 
 
-        <Label Text="¿Olvidaste tu contraseña?"
+        <Label IsEnabled="{Binding IsLoginVisible}" IsVisible="{Binding LoginVisibility}" Text="¿Olvidaste tu contraseña?"
        TextColor="Blue"
        FontSize="14"
        FontAttributes="Bold"

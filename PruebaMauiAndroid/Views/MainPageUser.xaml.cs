@@ -12,14 +12,13 @@ public partial class MainPageUser : ContentPage
     private async void Button_ClickedAsync(object sender, EventArgs e)
     {
 
-
+        
         var succes = await ServerConnection.UserLogout();
 
         if (succes == ResponseStatus.ACTION_SUCCESS)
         {
             await Navigation.PopModalAsync();
-            //await App.Current.MainPage.DisplayAlert("info", "Closing session", "OK");
-
+         
         }
     }
 }

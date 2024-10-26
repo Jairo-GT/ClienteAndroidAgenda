@@ -120,10 +120,11 @@ namespace ServerConnectionTest
 
         private static string BuildUserInfoResponseMessage(string protocol, string action, string token, string user, string user2, string role, string realName, string dateBorn,string extraData, bool isAdmin)
         {
-            var data = new List<string> { token, user, user2, role, realName, dateBorn };
-            var responseMessage = BuildResponseMessage(protocol, action, data);
+            var data2BytesOffset = new List<string> { token, user, user2, role, realName, dateBorn };
+            var responseMessage = BuildResponseMessage(protocol, action, data2BytesOffset);
+            var data4ByesOffset = new List<string>() { extraData };
 
-            foreach (var entry in data)
+            foreach (var entry in data4ByesOffset)
             {
                 responseMessage += $"{entry.Length:D4}{entry}";
             }

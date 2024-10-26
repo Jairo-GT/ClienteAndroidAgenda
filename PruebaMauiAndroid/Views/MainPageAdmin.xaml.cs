@@ -10,20 +10,10 @@ public partial class MainPageAdmin : ContentPage
     public MainPageAdmin()
     {
         InitializeComponent();
-
-
         userListViewUI.ItemsSource = Users;
     }
 
 
-    /* Cambio no fusionado mediante combinación del proyecto 'ClienteAndroidAgenda (net8.0-android)'
-    Antes:
-        private void Button_Clicked(object sender, EventArgs e)
-        {
-    Después:
-        private async Task Button_ClickedAsync(object sender, EventArgs e)
-        {
-    */
     private async void Button_ClickedAsync(object sender, EventArgs e)
     {
 
@@ -33,7 +23,7 @@ public partial class MainPageAdmin : ContentPage
         if (succes==ResponseStatus.ACTION_SUCCESS)
         {
             await Navigation.PopModalAsync();
-            //await App.Current.MainPage.DisplayAlert("info", "Closing session", "OK");
+          
 
         }
     }

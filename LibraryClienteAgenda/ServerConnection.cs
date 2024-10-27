@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net.Security;
+using System.Net.Sockets;
 using System.Text;
 
 
@@ -68,11 +69,11 @@ namespace LibraryClienteAgenda
     {
         private static string? ip;
         private static int port;
-        private static string? token;
+        //private static string? token;
         private static UserInfo? connectedUser;
        
 
-        public static string? Token { get => token; set => token = value; }
+        //public static string? Token { get => token; set => token = value; }
         public static UserInfo? ConnectedUser { get => connectedUser; set => connectedUser = value; }
 
 
@@ -125,7 +126,7 @@ namespace LibraryClienteAgenda
                 networkStream.WriteTimeout = timeoutMilliseconds;
                 networkStream.ReadTimeout = timeoutMilliseconds;
 
-                //Añadimos fin de linea para que el server pueda leer los datos
+                //Añadimos fin de linea ya que es lo que el server espera como fin de mensaje.
                 byte[] data = Encoding.UTF8.GetBytes(dataToSend + "\n");
 
                 await networkStream.WriteAsync(data);
@@ -169,6 +170,19 @@ namespace LibraryClienteAgenda
 
             return message;
 
+
+        }
+        private static string Add4bytesFields(List<string> dataToSend,string message = "")
+        {
+
+            foreach (var entry in dataToSend)
+            {
+
+
+                message += string.Format("{0:D4}", entry.Length) + entry;
+            }
+
+            return message;
 
         }
 
@@ -348,14 +362,40 @@ namespace LibraryClienteAgenda
                         ConnectedUser.FullName = userInfoData["realName"];
                         ConnectedUser.DataNaixement = userInfoData["dateBorn"];
                         ConnectedUser.Userrol = userInfoData["userRol"];
-                        ConnectedUser.UserToken = userInfoData["token"];
+                        ConnectedUser.Token = userInfoData["token"];
                         var parsedData = ParseData(["extraData"], userInfoData["nonParsedData"], 4, userInfoData);
                         ConnectedUser.DatosExtra = parsedData != null && parsedData.TryGetValue("extraData", out var extraData)? extraData : "";
                     }
                     else return ResponseStatus.ACTION_FAILED;
                     
                         return ResponseStatus.ACTION_SUCCESS;
-            
+                case ServerUserActions.CANVI_NOM:
+                    Console.WriteLine("Handling CHANGE_FULLNAME");
+                    var ChangeFullnameData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
+                    if (ChangeFullnameData != null && ConnectedUser != null)
+                    {
+                        if(ConnectedUser.Token == ChangeFullnameData["token"])
+                        return ResponseStatus.ACTION_SUCCESS;
+                    }
+                        break;
+                case ServerUserActions.CANVI_DATA:
+                    Console.WriteLine("Handling CHANGE_DATE_BORN");
+                    var ChangeDateData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
+                    if (ChangeDateData != null && ConnectedUser != null)
+                    {
+                        if (ConnectedUser.Token == ChangeDateData["token"])
+                            return ResponseStatus.ACTION_SUCCESS;
+                    }
+                    break;
+                case ServerUserActions.CANVI_ALTRES:
+                    Console.WriteLine("Handling CHANGE_DETAILS");
+                    var ChangeDetailsData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
+                    if (ChangeDetailsData != null && ConnectedUser != null)
+                    {
+                        if (ConnectedUser.Token == ChangeDetailsData["token"])
+                            return ResponseStatus.ACTION_SUCCESS;
+                    }
+                    break;
                 default:
                     Console.WriteLine("Acción desconocida para USER");
                     break;
@@ -381,11 +421,11 @@ namespace LibraryClienteAgenda
                 case ServerLoginActions.LOGIN_SUCCESS:
                     Console.WriteLine("Handling LOGIN_SUCCESS");
                     var retTokenLogin = ServerConnection.ParseData(["token"], data);
-                    if (retTokenLogin != null && retTokenLogin.TryGetValue("token", out string? valueTokenLogin))
+                    if (ConnectedUser!=null && retTokenLogin != null && retTokenLogin.TryGetValue("token", out string? valueTokenLogin))
                     {
 
                         System.Console.WriteLine("TOKEN OBTAINED: " + valueTokenLogin);
-                        Token = valueTokenLogin;
+                        ConnectedUser.Token = valueTokenLogin;
                         return ResponseStatus.ACTION_SUCCESS;
                     }
                    
@@ -393,21 +433,37 @@ namespace LibraryClienteAgenda
                 case ServerLoginActions.LOGOUT_SUCCESS:
                     Console.WriteLine("Handling LOGOUT_SUCCESS");
                     var retTokenLogout = ServerConnection.ParseData(["token"], data);
-                    if (retTokenLogout != null && retTokenLogout.TryGetValue("token", out string? valueTokenLogout))
+                    if (ConnectedUser != null && retTokenLogout != null && retTokenLogout.TryGetValue("token", out string? valueTokenLogout))
                     {
                         Console.WriteLine($"TokenInResponse:{valueTokenLogout}");
-                        Console.WriteLine($"TokenCurrentlyActive:{ServerConnection.Token}");
+                        Console.WriteLine($"TokenCurrentlyActive:{ServerConnection.ConnectedUser.Token}");
 
-                        if (ServerConnection.token != null && valueTokenLogout == ServerConnection.Token)
+                        if (ConnectedUser != null && ServerConnection.ConnectedUser.Token != null && valueTokenLogout == ServerConnection.ConnectedUser.Token)
                         {
-                            ServerConnection.Token = "";
+                            ServerConnection.ConnectedUser.Token = "";
                             ServerConnection.ConnectedUser = null;
                             return ResponseStatus.ACTION_SUCCESS;
                         }
 
                     }
-                    break;           
-                default:
+                    break;
+                case ServerLoginActions.RESET_PASSWORD_AFTER_LOGOUT:
+                    Console.WriteLine("Handling CHANGE_PASSWORD");
+                    var retTokenChangePassword = ServerConnection.ParseData(["token"], data);
+                    if (ConnectedUser != null && retTokenChangePassword != null && retTokenChangePassword.TryGetValue("token", out string? valueTokenChangePassword))
+                    {
+
+                        if (ServerConnection.ConnectedUser.Token != null && valueTokenChangePassword == ServerConnection.ConnectedUser.Token)
+                        {
+
+                            return ResponseStatus.ACTION_SUCCESS;
+                        
+                        }
+
+                        }
+                        break;
+
+                        default:
                     Console.WriteLine("Acción desconocida para LOGIN");
                     break;
             }
@@ -461,11 +517,11 @@ namespace LibraryClienteAgenda
 
 
 
-            if (!String.IsNullOrEmpty(ServerConnection.Token) && ConnectedUser != null)
+            if (ConnectedUser != null && !String.IsNullOrEmpty(ServerConnection.ConnectedUser.Token))
             {
 
 
-                string dataToSend = ServerConnection.AssembleServerMessage(((int)Protocol.LOGIN).ToString(), ((int)ClientLoginActions.LOGOUT).ToString("D2"), [ServerConnection.Token, ConnectedUser.UserName]);
+                string dataToSend = ServerConnection.AssembleServerMessage(((int)Protocol.LOGIN).ToString(), ((int)ClientLoginActions.LOGOUT).ToString("D2"), [ServerConnection.ConnectedUser.Token, ConnectedUser.UserName]);
                 string response = await SendDataAsync(dataToSend);
 
 
@@ -488,14 +544,14 @@ namespace LibraryClienteAgenda
         public static async Task<ResponseStatus> GetUserInfo()
         {
 
-            if (String.IsNullOrEmpty(ServerConnection.Token) || ConnectedUser == null )
+            if (String.IsNullOrEmpty(ServerConnection.ConnectedUser.Token) || ConnectedUser == null )
             {
                 Console.WriteLine("GetuserInfo: El Token o Usuario conectado no son válidos.");
                 return ResponseStatus.ACTION_FAILED;
 
             }
 
-            string userInfo = ServerConnection.AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.GET_USER_INFO).ToString("D2"), [ServerConnection.Token, ConnectedUser.UserName, ConnectedUser.UserName]);
+            string userInfo = ServerConnection.AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.GET_USER_INFO).ToString("D2"), [ServerConnection.ConnectedUser.Token, ConnectedUser.UserName, ConnectedUser.UserName]);
 
             var response = await ServerConnection.SendDataAsync(userInfo);
 
@@ -511,25 +567,95 @@ namespace LibraryClienteAgenda
 
 
         /// <summary>
-        /// Obtiene los datos de un usuario y los guarda en el campo ConnectedUser. Requiere un usuario autenticado.
+        /// Cambia la contraseña del usuario.
         /// </summary>
         ///<param name="newPassword">La nueva contraseña.</param>
         ///<param name="oldPassword">La antigua contraseña.</param>
-        /// <returns>True si la acción fue exitosa y False de otra manera.</returns>
+        /// <returns>Deuvle ResponseStatus.ACTION_SUCCES si la acción fue exitosa .ACTION_ERROR si ocurrio algun error o.ACTION_FAILED si no se pudo procesar.</returns>
         public static async Task<ResponseStatus> ChangeUserPassword(string newPassword,string oldPassword) {
 
-            if (String.IsNullOrEmpty(ServerConnection.Token) || ConnectedUser == null)
+            if (ConnectedUser != null  && String.IsNullOrEmpty(ServerConnection.ConnectedUser.Token))
             {
                 Console.WriteLine("GetuserInfo: El Token o Usuario conectado no son válidos.");
                 return ResponseStatus.ACTION_FAILED;
 
             }
 
-            string changePasswordMessage = AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.CHANGE_PASSWORD).ToString("D2"), [ServerConnection.token,ConnectedUser.UserName,oldPassword,newPassword,ConnectedUser.UserName]);
+            string changePasswordMessage = AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.CHANGE_PASSWORD).ToString("D2"), [ServerConnection.ConnectedUser.Token,ConnectedUser.UserName,oldPassword,newPassword,ConnectedUser.UserName]);
             string response = await SendDataAsync(changePasswordMessage);
 
 
 
+
+            return HandleResponse(response);
+        }
+
+
+        /// <summary>
+        /// Cambia el nombre completo de un usuario.
+        /// </summary>
+        ///<param name="newFullname">El nuevo nombre completo.</param>
+        /// <returns>Deuvle ResponseStatus.ACTION_SUCCES si la acción fue exitosa .ACTION_ERROR si ocurrio algun error o.ACTION_FAILED si no se pudo procesar.</returns>
+        public static async Task<ResponseStatus> ChangeUserFullName(string newFullname)
+        {
+
+            if (ConnectedUser != null && String.IsNullOrEmpty(ServerConnection.ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserFullName: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+            string changeFullNameMessage = AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.CHANGE_FULLNAME).ToString("D2"), [ServerConnection.ConnectedUser.Token, ConnectedUser.UserName,newFullname,ConnectedUser.UserName ]);
+            Console.WriteLine($"Sending message: {changeFullNameMessage}");
+            string response = await SendDataAsync(changeFullNameMessage);
+           
+            return HandleResponse(response);
+        }
+
+        /// <summary>
+        /// Cambia la fecha de nacimiento de un usuario.
+        /// </summary>
+        ///<param name="newFullname">La nueva fecha.</param>
+        /// <returns>Deuvle ResponseStatus.ACTION_SUCCES si la acción fue exitosa .ACTION_ERROR si ocurrio algun error o.ACTION_FAILED si no se pudo procesar.</returns>
+        public static async Task<ResponseStatus> ChangeUserDateBorn(string newDateBorn)
+        {
+
+            if (ConnectedUser != null && String.IsNullOrEmpty(ServerConnection.ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDateBorn: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+            string changeDateBornMessage = AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.CHANGE_BORN_DATE).ToString("D2"), [ServerConnection.ConnectedUser.Token, ConnectedUser.UserName,ConnectedUser.UserName,newDateBorn]);
+            Console.WriteLine($"Sending message: {changeDateBornMessage}");
+            string response = await SendDataAsync(changeDateBornMessage);
+
+            return HandleResponse(response);
+        }
+      
+        
+        /// <summary>
+        /// Cambia los detalles de un usuario.
+        /// </summary>
+        ///<param name="newDetails">Los nuevos detalles.</param>
+        /// <returns>Deuvle ResponseStatus.ACTION_SUCCES si la acción fue exitosa .ACTION_ERROR si ocurrio algun error o.ACTION_FAILED si no se pudo procesar.</returns>
+        public static async Task<ResponseStatus> ChangeUserDetails(string newDetails)
+        {
+
+            if (ConnectedUser != null && String.IsNullOrEmpty(ServerConnection.ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+            string changeDetailsMessage = AssembleServerMessage(((int)Protocol.USER).ToString(), ((int)ClientUserActions.CHANGE_OTHER_DATA).ToString("D2"), [ServerConnection.ConnectedUser.Token, ConnectedUser.UserName, ConnectedUser.UserName]);
+            changeDetailsMessage = Add4bytesFields([newDetails], changeDetailsMessage);
+            
+            Console.WriteLine($"Sending message: {changeDetailsMessage}");
+            string response = await SendDataAsync(changeDetailsMessage);
 
             return HandleResponse(response);
         }

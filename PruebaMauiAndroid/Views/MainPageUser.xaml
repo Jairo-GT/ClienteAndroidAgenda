@@ -6,9 +6,11 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem 
-                     Text="Profile"
+            x:Name="PerfilButton"
+                     Text="Perfil"
                      Priority="0"
                      Order="Primary"
+                    Clicked="PerfilButton_Clicked"
                      />
     </ContentPage.ToolbarItems>
 

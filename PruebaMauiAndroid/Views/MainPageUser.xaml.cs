@@ -12,7 +12,7 @@ public partial class MainPageUser : ContentPage
     private async void Button_ClickedAsync(object sender, EventArgs e)
     {
 
-        
+
         var succes = await ServerConnection.UserLogout();
 
         if (succes == ResponseStatus.ACTION_SUCCESS)
@@ -20,5 +20,12 @@ public partial class MainPageUser : ContentPage
             await Navigation.PopModalAsync();
          
         }
+    }
+
+    private async void PerfilButton_Clicked(object sender, EventArgs e)
+    {
+
+        await Navigation.PushAsync(new UserProfilePage());
+
     }
 }

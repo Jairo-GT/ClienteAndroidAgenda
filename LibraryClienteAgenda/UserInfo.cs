@@ -20,6 +20,7 @@ namespace LibraryClienteAgenda
         public string FullName { get; set; }
         public string DataNaixement { get; set; }
         public string UserToken { get; set; }
+        public string DatosExtra { get; set; }
 
 
     }

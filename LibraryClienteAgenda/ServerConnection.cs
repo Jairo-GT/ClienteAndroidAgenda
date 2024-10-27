@@ -79,10 +79,10 @@ namespace LibraryClienteAgenda
         #region HELPERS & SETUP
 
         /// <summary>
-        /// Sets up the server IP address and port number for the connection.
+        /// Prepara los campos de IP y PUERTO para la conexión con el servidor.
         /// </summary>
-        /// <param name="ip">The IP address of the server.</param>
-        /// <param name="port">The port number of the server.</param>
+        /// <param name="ip">La dirección IP del servidor.</param>
+        /// <param name="port">El puerto del servidor.</param>
         public static void SetupServerVars(string ip, int port)
         {
 
@@ -96,6 +96,7 @@ namespace LibraryClienteAgenda
         /// </summary>
         /// <param name="dataToSend">Los petición al servidor.</param>
         /// <param name="timeoutMilliseconds">El tiempo de espera a un mensaje de respuesta o se cancela la tarea.</param>
+        /// <returns>La respuesta del servidor.</returns>
         public static async Task<string> SendDataAsync(string dataToSend, int timeoutMilliseconds = 5000)
         {
             try
@@ -153,6 +154,7 @@ namespace LibraryClienteAgenda
         /// <param name="action">La acción de la petición al servidor.</param>
         /// <param name="dataToSend">Los datos extras a enviar de manera secuencial en una List<string>.</param>
         /// <param name="encrypt">Si el mensaje al servidor debe estar encriptado.</param>
+        /// <returns>Una string que contiene la petición para el servidor construida.</returns>
         public static string AssembleServerMessage(string protocol, string action, List<string> dataToSend, bool encrypt = false)
         {
             string message = protocol + action;
@@ -175,30 +177,47 @@ namespace LibraryClienteAgenda
         /// </summary>
         /// <param name="keys">Las keys del diccionario devuelto despues de extraer los datos. Los extrae de manera secuencial.</param>
         /// <param name="data">Los datos a extraer formados por un offset que marca el tamaño y el dato en si en una String.</param>
-        public static Dictionary<string, string> ParseData(List<string> keys, string data)
+        /// <param name="offsetSize">Tamaño del offset en bytes antes de cada campo sucesivo.</param>
+        /// <param name="offsetSize">Diccionario con los datos segregados, si es null creara uno nuevo si los agregara al diccionario y lo devolverá.</param>
+        /// <returns>Un diccionario con los campos indicados extraidos de la string data. Si hay alguna excepción devolverá un diccionario vacío.</returns>
+        public static Dictionary<string, string> ParseData(List<string> keys, string data, int offsetSize = 2, Dictionary<string,string>? parsedData = null)
         {
-
-            Dictionary<string, string> parsedData = [];
-
-            foreach (var k in keys)
+            try
             {
+                parsedData = parsedData ?? new Dictionary<string, string>();
 
-                if (int.TryParse(data[..2], out int size))
+                Console.WriteLine($"DataToParse: {data}");
+                foreach (var k in keys)
                 {
 
-                    string extracted = data.Substring(2, size);
+                    if (int.TryParse(data[..offsetSize], out int size))
+                    {
 
-                    parsedData[k] = extracted;
+                        string extracted = data.Substring(offsetSize, size);
 
-                    data = data[(2 + size)..];
+                        parsedData[k] = extracted;
+
+                        data = data[(offsetSize + size)..];
+
+                    }
+
 
                 }
 
+                parsedData["nonParsedData"] = data;
+                Console.WriteLine($"NonParsedData: {data}");
+
+                return parsedData;
 
             }
+            catch (Exception _)
+            {
+                parsedData = null;
+                return parsedData;
 
-
-            return parsedData;
+            }
+           
+          
 
         }
 
@@ -321,15 +340,17 @@ namespace LibraryClienteAgenda
 
                 case ServerUserActions.USER_INFO:
                     Console.WriteLine("Handling USER INFO");
-                    var dict = ParseData(["token", "user", "user2","userRol", "realName", "dateBorn"], data);
-                    //Falta el alias pero hay algo raro como numeros de más en el mensaje
-                    if (ConnectedUser != null)
+                    var userInfoData = ParseData(["token", "user","userRol", "realName", "dateBorn"], data);
+
+                    if (userInfoData != null && ConnectedUser != null)
                     {
                         ConnectedUser.IsAdmin = data.Trim().LastOrDefault().ToString() == "1";
-                        ConnectedUser.FullName = dict["realName"];
-                        ConnectedUser.DataNaixement = dict["dateBorn"];
-                        ConnectedUser.Userrol = dict["userRol"];
-                        ConnectedUser.UserToken = dict["token"];
+                        ConnectedUser.FullName = userInfoData["realName"];
+                        ConnectedUser.DataNaixement = userInfoData["dateBorn"];
+                        ConnectedUser.Userrol = userInfoData["userRol"];
+                        ConnectedUser.UserToken = userInfoData["token"];
+                        var parsedData = ParseData(["extraData"], userInfoData["nonParsedData"], 4, userInfoData);
+                        ConnectedUser.DatosExtra = parsedData != null && parsedData.TryGetValue("extraData", out var extraData)? extraData : "";
                     }
                     else return ResponseStatus.ACTION_FAILED;
                     
@@ -359,29 +380,39 @@ namespace LibraryClienteAgenda
             {
                 case ServerLoginActions.LOGIN_SUCCESS:
                     Console.WriteLine("Handling LOGIN_SUCCESS");
-                    var retToken = ServerConnection.ParseData(["token"], data);
-                    if (retToken.TryGetValue("token", out string? value))
+                    var retTokenLogin = ServerConnection.ParseData(["token"], data);
+                    if (retTokenLogin != null && retTokenLogin.TryGetValue("token", out string? valueTokenLogin))
                     {
 
-                        System.Console.WriteLine("TOKEN OBTAINED: " + value);
-                        Token = value;
-
+                        System.Console.WriteLine("TOKEN OBTAINED: " + valueTokenLogin);
+                        Token = valueTokenLogin;
+                        return ResponseStatus.ACTION_SUCCESS;
                     }
-                    else 
-                        return ResponseStatus.ACTION_FAILED;
+                   
                     break;
                 case ServerLoginActions.LOGOUT_SUCCESS:
                     Console.WriteLine("Handling LOGOUT_SUCCESS");
-                    //NO HAY TOKEN DE MOMENTO ASI QUE.. return true;
-                    ServerConnection.Token = "";
-                    ServerConnection.ConnectedUser = null;
+                    var retTokenLogout = ServerConnection.ParseData(["token"], data);
+                    if (retTokenLogout != null && retTokenLogout.TryGetValue("token", out string? valueTokenLogout))
+                    {
+                        Console.WriteLine($"TokenInResponse:{valueTokenLogout}");
+                        Console.WriteLine($"TokenCurrentlyActive:{ServerConnection.Token}");
+
+                        if (ServerConnection.token != null && valueTokenLogout == ServerConnection.Token)
+                        {
+                            ServerConnection.Token = "";
+                            ServerConnection.ConnectedUser = null;
+                            return ResponseStatus.ACTION_SUCCESS;
+                        }
+
+                    }
                     break;           
                 default:
                     Console.WriteLine("Acción desconocida para LOGIN");
-                    return ResponseStatus.ACTION_FAILED;
+                    break;
             }
 
-            return ResponseStatus.ACTION_SUCCESS;
+            return ResponseStatus.ACTION_FAILED;
 
         }
 

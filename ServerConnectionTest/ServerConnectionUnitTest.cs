@@ -49,7 +49,7 @@ namespace ServerConnectionTest
 
         }
         [Fact(Skip = "No implementado")] //104
-        public void Handle_ChangePassword_After_Logout_Response() { }
+        public void Handle_ChangePassword_Success_Response() { }
 
 
         #endregion
@@ -64,13 +64,12 @@ namespace ServerConnectionTest
 
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
             var user = "user";
-            var user2 = "user2";
             var rol = "userRol";
             var realName = "realName";
             var dateBorn = "dateBorn";
             var extraData = "No hay datos extras";
 
-            var responseMessage = BuildUserInfoResponseMessage("2", "15", token, user, user2, rol, realName, dateBorn, extraData, isAdmin: true);
+            var responseMessage = BuildUserInfoResponseMessage("2", "15", token, user, rol, realName, dateBorn, extraData, isAdmin: true);
             Console.WriteLine(responseMessage);
 
             //El usuario esta logeado asi que debería tener el token y su nombre asignados correctamente.
@@ -79,16 +78,18 @@ namespace ServerConnectionTest
 
 
             ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
-            //TODO: Saber cual es el user principal 1 o 2 y hacer comprobación también.
+            
+
             //Simulamos que hemos enviado un mensaje correcto, y los datos pertinentes han cambiado.
             Assert.True(success==ResponseStatus.ACTION_SUCCESS);
+            Assert.NotNull(ServerConnection.ConnectedUser);
             Assert.True(ServerConnection.ConnectedUser.IsAdmin);
             Assert.Equal(token, ServerConnection.Token);
             Assert.Equal(ServerConnection.ConnectedUser.UserName, user);
             Assert.Equal(rol, ServerConnection.ConnectedUser.Userrol);
             Assert.Equal(realName, ServerConnection.ConnectedUser.FullName);
             Assert.Equal(dateBorn, ServerConnection.ConnectedUser.DataNaixement);
-           
+            Assert.Equal(extraData, ServerConnection.ConnectedUser.DatosExtra);
 
         }
         [Fact(Skip = "No implementado")] //220
@@ -118,9 +119,9 @@ namespace ServerConnectionTest
             return response;
         }
 
-        private static string BuildUserInfoResponseMessage(string protocol, string action, string token, string user, string user2, string role, string realName, string dateBorn,string extraData, bool isAdmin)
+        private static string BuildUserInfoResponseMessage(string protocol, string action, string token, string user,string role, string realName, string dateBorn,string extraData, bool isAdmin)
         {
-            var data2BytesOffset = new List<string> { token, user, user2, role, realName, dateBorn };
+            var data2BytesOffset = new List<string> { token, user, role, realName, dateBorn };
             var responseMessage = BuildResponseMessage(protocol, action, data2BytesOffset);
             var data4ByesOffset = new List<string>() { extraData };
 

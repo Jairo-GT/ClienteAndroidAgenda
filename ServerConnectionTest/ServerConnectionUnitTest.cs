@@ -6,19 +6,21 @@ namespace ServerConnectionTest
     public class ServerConnectionUnitTest
 
     {
+        
         #region Protocol 1: Connection/Login Responses Tests
         [Fact]//103
         public void Handle_Login_Success_Response()
         {
-
-
-            //Protocol (1byte)  + action (2bytes) + sizeToken(2 bytes) + Token (siempre 36 bytes)
+            var user = "user";
+            var message = ServerMessageFactory.Create(Protocol.LOGIN, ClientLoginActions.LOGIN, ["random", "dataToCreateMessage"]);
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
             var responseMessage = BuildResponseMessage("1", "03", [token]);
-            var user = "user";
+            message.DissasembleResponse(responseMessage);
+          
+
 
             ServerConnection.ConnectedUser = new(user);
-            ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
+            ResponseStatus success = ServerMessageHandler.HandleResponse(message);
 
             //Simulamos que hemos enviado un mensaje correcto, y recibido la respuesta que toca.
             Assert.True(success==ResponseStatus.ACTION_SUCCESS);
@@ -31,16 +33,18 @@ namespace ServerConnectionTest
         {
 
 
-            //Protocol (1byte)  + action (2bytes) + sizeToken(2 bytes) + Token (always 36 bytes)
+            var message = ServerMessageFactory.Create(Protocol.LOGIN, ClientLoginActions.LOGIN, ["random", "dataToCreateMessage"]);
+
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
             var responseMessage = BuildResponseMessage("1", "02", [token]);
+            message.DissasembleResponse(responseMessage);
             var user = "user";
 
             ServerConnection.ConnectedUser = new(user);
             ServerConnection.ConnectedUser.Token = token;
 
 
-            ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
+            ResponseStatus success = ServerMessageHandler.HandleResponse(message);
 
             //Simulamos que hemos enviado un mensaje correcto, y recibido la respuesta que toca.
             Assert.True(success == ResponseStatus.ACTION_SUCCESS);
@@ -52,13 +56,15 @@ namespace ServerConnectionTest
             
             var token = "KKKKKKKKKKIIIIIIIIIIOOOOOOOOOOPPPPPP";
             var responseMessage = BuildResponseMessage("1", "04", [token]);
+            var message = ServerMessageFactory.Create(Protocol.LOGIN, ClientLoginActions.LOGIN, ["random", "dataToCreateMessage"]);
+            message.DissasembleResponse(responseMessage);
             var user = "user";
 
             ServerConnection.ConnectedUser = new(user);
             ServerConnection.ConnectedUser.Token = token;
 
 
-            var success = ServerConnection.HandleResponse(responseMessage);
+            var success = ServerMessageHandler.HandleResponse(message);
 
             Assert.True(success == ResponseStatus.ACTION_SUCCESS);
             Assert.Equal(ServerConnection.ConnectedUser.Token, token);
@@ -84,8 +90,11 @@ namespace ServerConnectionTest
             var realName = "realName";
             var dateBorn = "dateBorn";
             var extraData = "No hay datos extras";
+            var message = ServerMessageFactory.Create(Protocol.LOGIN, ClientLoginActions.LOGIN, ["random", "dataToCreateMessage"]);
+           
 
             var responseMessage = BuildUserInfoResponseMessage("2", "15", token, user, rol, realName, dateBorn, extraData, isAdmin: true);
+            message.DissasembleResponse(responseMessage);
             Console.WriteLine(responseMessage);
 
             //El usuario esta logeado asi que debería tener el token y su nombre asignados correctamente.
@@ -93,7 +102,7 @@ namespace ServerConnectionTest
             ServerConnection.ConnectedUser.Token = token;
 
 
-            ResponseStatus success = ServerConnection.HandleResponse(responseMessage);
+            ResponseStatus success = ServerMessageHandler.HandleResponse(message);
             
 
             //Simulamos que hemos enviado un mensaje correcto, y los datos pertinentes han cambiado.
@@ -124,7 +133,9 @@ namespace ServerConnectionTest
 
         private static string BuildResponseMessage(string protocol, string action, List<string> data)
         {
-
+            //Random sentMessage
+            var message = new ServerMessage<ClientLoginActions>(Protocol.LOGIN, ClientLoginActions.LOGIN, data);
+            
             string response = protocol + action;
             foreach(var entry in data)
             {

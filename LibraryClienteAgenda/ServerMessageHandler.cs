@@ -6,9 +6,17 @@ using System.Threading.Tasks;
 
 namespace LibraryClienteAgenda
 {
-    public class ServerMessageHandler
+    public class ServerMessageHandler : IServerMessageHandler
     {
+        private IServerConnection servI;
 
+        public ServerMessageHandler() { }
+
+        public void SetConnection(IServerConnection serverInterface)
+        {
+            servI = serverInterface;
+
+        }
         /// <summary>
         /// Devuelve un diccionario con los datos parseados de una respuesta de servidor.
         /// </summary>
@@ -17,7 +25,7 @@ namespace LibraryClienteAgenda
         /// <param name="offsetSize">Tamaño del offset en bytes antes de cada campo sucesivo.</param>
         /// <param name="offsetSize">Diccionario con los datos segregados, si es null creara uno nuevo si los agregara al diccionario y lo devolverá.</param>
         /// <returns>Un diccionario con los campos indicados extraidos de la string data. Si hay alguna excepción devolverá un diccionario vacío.</returns>
-        public static Dictionary<string, string> ParseData(List<string> keys, string data, int offsetSize = 2, Dictionary<string, string>? parsedData = null)
+        public Dictionary<string, string> ParseData(List<string> keys, string data, int offsetSize = 2, Dictionary<string, string>? parsedData = null)
         {
             try
             {
@@ -47,7 +55,7 @@ namespace LibraryClienteAgenda
                 return parsedData;
 
             }
-            catch (Exception _)
+            catch (Exception)
             {
                 parsedData = null;
                 return parsedData;
@@ -64,7 +72,7 @@ namespace LibraryClienteAgenda
         /// </summary>
         /// <param name="response">La respuesta del servidor.</param>
         /// <returns>Devuelve un ResponseStatus con SUCCES,FAILED,ERROR segun si la acción tuvo éxito,falló o devolvió un mensaje de error/denegación. </returns>
-        public static ResponseStatus HandleResponse<TAction>(ServerMessage<TAction> message) where TAction : Enum
+        public ResponseStatus HandleResponse<TAction>(ServerMessage<TAction> message) where TAction : Enum
         {
 
             var parsedAction = message.ResponseActionIntValue;
@@ -100,7 +108,7 @@ namespace LibraryClienteAgenda
         /// <param name="serverAction">La acción a confirmar.</param>
         /// <param name="data">Los datos de la respuesta del servidor.</param>
         /// <returns>Devuelve un ResponseStatus con ERROR o FAILED si la acción no fue gestionada. </returns>
-        private static ResponseStatus HandleServerErrorActions(ServerErrorActions serverAction, string data)
+        private ResponseStatus HandleServerErrorActions(ServerErrorActions serverAction, string data)
         {
 
             switch (serverAction)
@@ -149,7 +157,7 @@ namespace LibraryClienteAgenda
         /// <param name="serverAction">La acción a confirmar.</param>
         /// <param name="data">Los datos de la respuesta del servidor.</param>
         /// <returns>Devuelve un ResponseStatus con SUCCES si tuvo éxito o FAILED si la acción no fue gestionada.</returns>
-        private static ResponseStatus HandleServerUserActions(ServerUserActions serverAction, string data)
+        private ResponseStatus HandleServerUserActions(ServerUserActions serverAction, string data)
         {
 
             switch (serverAction)
@@ -159,15 +167,15 @@ namespace LibraryClienteAgenda
                     Console.WriteLine("Handling USER INFO");
                     var userInfoData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
 
-                    if (userInfoData != null && ServerConnection.ConnectedUser != null)
+                    if (userInfoData != null && servI.ConnectedUser != null)
                     {
-                        ServerConnection.ConnectedUser.IsAdmin = data.Trim().LastOrDefault().ToString() == "1";
-                        ServerConnection.ConnectedUser.FullName = userInfoData["realName"];
-                        ServerConnection.ConnectedUser.DataNaixement = userInfoData["dateBorn"];
-                        ServerConnection.ConnectedUser.Userrol = userInfoData["userRol"];
-                        ServerConnection.ConnectedUser.Token = userInfoData["token"];
+                        servI.ConnectedUser.IsAdmin = data.Trim().LastOrDefault().ToString() == "1";
+                        servI.ConnectedUser.FullName = userInfoData["realName"];
+                        servI.ConnectedUser.DataNaixement = userInfoData["dateBorn"];
+                        servI.ConnectedUser.Userrol = userInfoData["userRol"];
+                        servI.ConnectedUser.Token = userInfoData["token"];
                         var parsedData = ParseData(["extraData"], userInfoData["nonParsedData"], 4, userInfoData);
-                        ServerConnection.ConnectedUser.DatosExtra = parsedData != null && parsedData.TryGetValue("extraData", out var extraData) ? extraData : "";
+                        servI.ConnectedUser.DatosExtra = parsedData != null && parsedData.TryGetValue("extraData", out var extraData) ? extraData : "";
                     }
                     else return ResponseStatus.ACTION_FAILED;
 
@@ -175,27 +183,27 @@ namespace LibraryClienteAgenda
                 case ServerUserActions.CANVI_NOM:
                     Console.WriteLine("Handling CHANGE_FULLNAME");
                     var ChangeFullnameData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
-                    if (ChangeFullnameData != null && ServerConnection.ConnectedUser != null)
+                    if (ChangeFullnameData != null && servI.ConnectedUser != null)
                     {
-                        if (ServerConnection.ConnectedUser.Token == ChangeFullnameData["token"])
+                        if (servI.ConnectedUser.Token == ChangeFullnameData["token"])
                             return ResponseStatus.ACTION_SUCCESS;
                     }
                     break;
                 case ServerUserActions.CANVI_DATA:
                     Console.WriteLine("Handling CHANGE_DATE_BORN");
                     var ChangeDateData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
-                    if (ChangeDateData != null && ServerConnection.ConnectedUser != null)
+                    if (ChangeDateData != null && servI.ConnectedUser != null)
                     {
-                        if (ServerConnection.ConnectedUser.Token == ChangeDateData["token"])
+                        if (servI.ConnectedUser.Token == ChangeDateData["token"])
                             return ResponseStatus.ACTION_SUCCESS;
                     }
                     break;
                 case ServerUserActions.CANVI_ALTRES:
                     Console.WriteLine("Handling CHANGE_DETAILS");
                     var ChangeDetailsData = ParseData(["token", "user", "userRol", "realName", "dateBorn"], data);
-                    if (ChangeDetailsData != null && ServerConnection.ConnectedUser != null)
+                    if (ChangeDetailsData != null && servI.ConnectedUser != null)
                     {
-                        if (ServerConnection.ConnectedUser.Token == ChangeDetailsData["token"])
+                        if (servI.ConnectedUser.Token == ChangeDetailsData["token"])
                             return ResponseStatus.ACTION_SUCCESS;
                     }
                     break;
@@ -215,21 +223,21 @@ namespace LibraryClienteAgenda
         /// <param name="serverAction">La acción a confirmar.</param>
         /// <param name="data">Los datos de la respuesta del servidor.</param>
         /// <returns>Devuelve un ResponseStatus con SUCCES si tuvo éxito o FAILED si la acción no fue gestionada.</returns>
-        private static ResponseStatus HandleServerLoginActions(ServerLoginActions serverAction, string data)
+        private ResponseStatus HandleServerLoginActions(ServerLoginActions serverAction, string data)
         {
 
-         
+
 
             switch (serverAction)
             {
                 case ServerLoginActions.LOGIN_SUCCESS:
                     Console.WriteLine("Handling LOGIN_SUCCESS");
                     var retTokenLogin = ParseData(["token"], data);
-                    if (ServerConnection.ConnectedUser != null && retTokenLogin != null && retTokenLogin.TryGetValue("token", out string? valueTokenLogin))
+                    if (servI.ConnectedUser != null && retTokenLogin != null && retTokenLogin.TryGetValue("token", out string? valueTokenLogin))
                     {
 
                         System.Console.WriteLine("TOKEN OBTAINED: " + valueTokenLogin);
-                        ServerConnection.ConnectedUser.Token = valueTokenLogin;
+                        servI.ConnectedUser.Token = valueTokenLogin;
                         return ResponseStatus.ACTION_SUCCESS;
                     }
 
@@ -237,15 +245,15 @@ namespace LibraryClienteAgenda
                 case ServerLoginActions.LOGOUT_SUCCESS:
                     Console.WriteLine("Handling LOGOUT_SUCCESS");
                     var retTokenLogout = ParseData(["token"], data);
-                    if (ServerConnection.ConnectedUser != null && retTokenLogout != null && retTokenLogout.TryGetValue("token", out string? valueTokenLogout))
+                    if (servI.ConnectedUser != null && retTokenLogout != null && retTokenLogout.TryGetValue("token", out string? valueTokenLogout))
                     {
                         Console.WriteLine($"TokenInResponse:{valueTokenLogout}");
-                        Console.WriteLine($"TokenCurrentlyActive:{ServerConnection.ConnectedUser.Token}");
+                        Console.WriteLine($"TokenCurrentlyActive:{servI.ConnectedUser.Token}");
 
-                        if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.Token != null && valueTokenLogout == ServerConnection.ConnectedUser.Token)
+                        if (servI.ConnectedUser != null && servI.ConnectedUser.Token != null && valueTokenLogout == servI.ConnectedUser.Token)
                         {
-                            ServerConnection.ConnectedUser.Token = "";
-                            ServerConnection.ConnectedUser = null;
+                            servI.ConnectedUser.Token = "";
+                            servI.ConnectedUser = null;
                             return ResponseStatus.ACTION_SUCCESS;
                         }
 
@@ -254,10 +262,10 @@ namespace LibraryClienteAgenda
                 case ServerLoginActions.RESET_PASSWORD_AFTER_LOGOUT:
                     Console.WriteLine("Handling CHANGE_PASSWORD");
                     var retTokenChangePassword = ParseData(["token"], data);
-                    if (ServerConnection.ConnectedUser != null && retTokenChangePassword != null && retTokenChangePassword.TryGetValue("token", out string? valueTokenChangePassword))
+                    if (servI.ConnectedUser != null && retTokenChangePassword != null && retTokenChangePassword.TryGetValue("token", out string? valueTokenChangePassword))
                     {
 
-                        if (ServerConnection.ConnectedUser.Token != null && valueTokenChangePassword == ServerConnection.ConnectedUser.Token)
+                        if (servI.ConnectedUser.Token != null && valueTokenChangePassword == servI.ConnectedUser.Token)
                         {
 
                             return ResponseStatus.ACTION_SUCCESS;

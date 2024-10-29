@@ -11,10 +11,13 @@ public partial class Login : ContentView
     public Login()
     {
         InitializeComponent();
-        
-        viewModel = new(Navigation);
+        ServerMessageFactory mFactory = new();
+        ServerMessageHandler mHandler = new();
+        ServerConnection connection = new(mFactory,mHandler);
+        connection.SetupServerVars("10.0.2.2", 12522);
+        viewModel = new(Navigation,connection);
         BindingContext = viewModel;
-        ServerConnection.SetupServerVars("10.0.2.2", 12522);
+        
        
     }
 

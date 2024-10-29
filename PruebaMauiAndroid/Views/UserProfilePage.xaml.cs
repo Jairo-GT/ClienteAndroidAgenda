@@ -7,10 +7,10 @@ public partial class UserProfilePage : ContentPage
 {
 
     public readonly UserProfilePageViewModel viewModel;
-    public UserProfilePage()
+    public UserProfilePage(IServerConnection connection)
 	{
 		InitializeComponent();
-		viewModel = new UserProfilePageViewModel();
+		viewModel = new UserProfilePageViewModel(connection);
 		BindingContext = viewModel;
 
 	}

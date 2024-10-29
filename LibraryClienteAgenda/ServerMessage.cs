@@ -10,6 +10,8 @@ namespace LibraryClienteAgenda
     //TODO: Control de errores, valores nulos etc
     public class ServerMessage<TAction> where TAction : Enum
     {
+      
+
         public ResponseStatus ResponseStatus { get; private set; }
         public string RequestProtocol { get; private set; }
         public string RequestAction { get; private set; }
@@ -46,7 +48,6 @@ namespace LibraryClienteAgenda
         public ServerMessage(Protocol requestProtocol,TAction requestAction,List<string> data, Dictionary<int, int>? byteSizes = null) 
         {
             if (requestAction == null || requestAction == null || data == null) throw new Exception("ServerMessage: Fields requestProtocol,requestAction,data cannot be null");
-
 
             RequestProtocol = Convert.ToInt32(requestProtocol).ToString();
             RequestAction = Convert.ToInt32(requestAction).ToString("D2");

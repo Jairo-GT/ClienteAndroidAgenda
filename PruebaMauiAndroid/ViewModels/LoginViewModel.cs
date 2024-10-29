@@ -8,6 +8,7 @@ namespace ClienteAndroidAgenda.ViewModels
 {
     public class LoginViewModel : INotifyPropertyChanged
     {
+        private IServerConnection connection;
         private string? _username;
         public string? UserName
         {
@@ -93,9 +94,9 @@ namespace ClienteAndroidAgenda.ViewModels
 
         }
     
-        public LoginViewModel(INavigation nav)
+        public LoginViewModel(INavigation nav, IServerConnection conn)
         {
-            
+            connection = conn;
             LoginCommand = new Command( async () => LoginAsync(nav));
           
         }
@@ -110,7 +111,7 @@ namespace ClienteAndroidAgenda.ViewModels
             string user = sanetizeAndValidateUsername(UserName);
             string password = sanetizeAndValidatePassword(Password);
 
-            var success = await ServerConnection.UserLogin(user, password);
+            var success = await connection.UserLogin(user, password);
             Password = "";
 
             //Simulamos espera
@@ -120,17 +121,17 @@ namespace ClienteAndroidAgenda.ViewModels
             if (success == ResponseStatus.ACTION_SUCCESS)
             {
                 UserName = "";
-                if (ServerConnection.ConnectedUser != null && ServerConnection.ConnectedUser.IsAdmin == true)
+                if (connection.ConnectedUser != null && connection.ConnectedUser.IsAdmin == true)
                 {
 
-                    var adminPage = new NavigationPage(new MainPageAdmin());
+                    var adminPage = new NavigationPage(new MainPageAdmin(connection));
                     NavigationPage.SetHasBackButton(adminPage.CurrentPage, false);
                     await nav.PushModalAsync(adminPage);
                 }
 
 
                 else {
-                    var userPage = new NavigationPage(new MainPageUser());
+                    var userPage = new NavigationPage(new MainPageUser(connection));
                     NavigationPage.SetHasBackButton(userPage.CurrentPage, false);
                     await nav.PushModalAsync(userPage);
                 }

@@ -6,10 +6,12 @@ public partial class MainPageAdmin : ContentPage
 {
     public List<string> Users { get; set; } = new List<string>() { "User1", "User2", "User3" };
 
+    private IServerConnection connection; //Hasta que se añade viewmodel
 
-    public MainPageAdmin()
+    public MainPageAdmin(IServerConnection connection)
     {
         InitializeComponent();
+        this.connection = connection;
         userListViewUI.ItemsSource = Users;
     }
 
@@ -18,7 +20,7 @@ public partial class MainPageAdmin : ContentPage
     {
 
 
-        var succes = await ServerConnection.UserLogout();
+        var succes = await connection.UserLogout();
 
         if (succes==ResponseStatus.ACTION_SUCCESS)
         {

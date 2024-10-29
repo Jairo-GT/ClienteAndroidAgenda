@@ -12,6 +12,7 @@ namespace ClienteAndroidAgenda.ViewModels
 {
     public class UserProfilePageViewModel : INotifyPropertyChanged
     {
+        private IServerConnection connection;
         public event PropertyChangedEventHandler? PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
@@ -76,15 +77,15 @@ namespace ClienteAndroidAgenda.ViewModels
             }
         }
 
-        public UserProfilePageViewModel()
+        public UserProfilePageViewModel(IServerConnection conn)
         {
-
-            if(ServerConnection.ConnectedUser != null)
+            connection = conn;
+            if(connection.ConnectedUser != null)
             {
-                Details = ServerConnection.ConnectedUser.DatosExtra;
-                FullName = ServerConnection.ConnectedUser.FullName;
-                UserName = ServerConnection.ConnectedUser.UserName;
-                DateBorn = ServerConnection.ConnectedUser.DataNaixement;
+                Details = connection.ConnectedUser.DatosExtra;
+                FullName = connection.ConnectedUser.FullName;
+                UserName = connection.ConnectedUser.UserName;
+                DateBorn = connection.ConnectedUser.DataNaixement;
 
             }
             
@@ -97,24 +98,24 @@ namespace ClienteAndroidAgenda.ViewModels
 
 
 
-            if( ServerConnection.ConnectedUser != null) {
+            if( connection.ConnectedUser != null) {
 
 
-                var response = FullName != null ? await ServerConnection.ChangeUserFullName(FullName) : ResponseStatus.ACTION_FAILED;
+                var response = FullName != null ? await connection.ChangeUserFullName(FullName) : ResponseStatus.ACTION_FAILED;
 
                 if (response == ResponseStatus.ACTION_SUCCESS)                    
-                    ServerConnection.ConnectedUser.FullName = FullName;
+                    connection.ConnectedUser.FullName = FullName;
             
 
-                response = DateBorn != null ? await ServerConnection.ChangeUserDateBorn(DateBorn): ResponseStatus.ACTION_FAILED;
+                response = DateBorn != null ? await connection.ChangeUserDateBorn(DateBorn): ResponseStatus.ACTION_FAILED;
                 if (response == ResponseStatus.ACTION_SUCCESS)
-                    ServerConnection.ConnectedUser.DataNaixement = DateBorn;
+                    connection.ConnectedUser.DataNaixement = DateBorn;
 
 
 
-                response = FullName != null ? await ServerConnection.ChangeUserDetails(FullName) : ResponseStatus.ACTION_FAILED;
+                response = FullName != null ? await connection.ChangeUserDetails(FullName) : ResponseStatus.ACTION_FAILED;
                 if (response == ResponseStatus.ACTION_SUCCESS)
-                   ServerConnection.ConnectedUser.DatosExtra= Details;
+                   connection.ConnectedUser.DatosExtra= Details;
 
             }
         }

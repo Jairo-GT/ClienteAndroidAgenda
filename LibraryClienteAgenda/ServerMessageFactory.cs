@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace LibraryClienteAgenda
 {
-    public static class ServerMessageFactory
+    public class ServerMessageFactory
     {
-        public static ServerMessage<TAction> Create<TAction>(Protocol requestProtocol, TAction requestAction, List<string> data, Dictionary<int,int>? indexSizeBytes = null) where TAction :Enum
+        public ServerMessage<TAction> Create<TAction>(Protocol requestProtocol, TAction requestAction, List<string> data, Dictionary<int,int>? indexSizeBytes = null) where TAction :Enum
         {
             return new ServerMessage<TAction>(requestProtocol, requestAction, data,indexSizeBytes);
         }

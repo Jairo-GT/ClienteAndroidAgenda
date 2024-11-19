@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ClienteAndroidAgenda.Views.MainPageAdmin"
-             Title="Administración de usuarios">
+             Title="Administración de usuarios"
+           
+             >
 
 
 
@@ -18,7 +20,7 @@
 
         <Entry Placeholder="Buscar..." Margin="5,5,5,5"/>
 
-        <ListView x:Name="userListViewUI">
+            <ListView x:Name="userListViewUI">
           
             <ListView.ItemTemplate>
                 <DataTemplate>

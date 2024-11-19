@@ -241,7 +241,7 @@ namespace LibraryClienteAgenda
         /// Cambia los detalles de un usuario.
         /// </summary>
         ///<param name="newDetails">Los nuevos detalles.</param>
-        /// <returns>Deuvle ResponseStatus.ACTION_SUCCES si la acción fue exitosa .ACTION_ERROR si ocurrio algun error o.ACTION_FAILED si no se pudo procesar.</returns>
+        /// <returns>Devuelve ResponseStatus.ACTION_SUCCES si la acción fue exitosa .ACTION_ERROR si ocurrio algun error o.ACTION_FAILED si no se pudo procesar.</returns>
         public async Task<ResponseStatus> ChangeUserDetails(string newDetails)
         {
 
@@ -254,6 +254,178 @@ namespace LibraryClienteAgenda
 
 
             var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.CHANGE_OTHER_DATA, [ConnectedUser.Token, ConnectedUser.UserName, ConnectedUser.UserName, newDetails], indexSizeBytes: new Dictionary<int, int> { { 3, 4 } }));
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> AddNewUser(string username,string password,string nomSencer,string dataNaixement, string altresDades4Bytes,string rolPermisos)
+        {
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.ADD_NEW_USER, [ConnectedUser.Token, ConnectedUser.UserName, username,password,nomSencer,dataNaixement,altresDades4Bytes,rolPermisos], indexSizeBytes: new Dictionary<int, int> { { 6, 4 } }));
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> DeleteUser(string username)
+        {
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.DELETE_USER, [ConnectedUser.Token, ConnectedUser.UserName, username]));
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> GetAllUsers()
+        {
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.GET_ALL_USERS, [ConnectedUser.Token, ConnectedUser.UserName]));
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+
+        public async Task<ResponseStatus> AddPermission(string roleName,string permissions)
+        {
+
+            throw new NotImplementedException();
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.ADD_PERMISSION, [ConnectedUser.Token, ConnectedUser.UserName,roleName]));
+
+            //Añadir permisos 7 bytes 1 byte x permiso, TODO
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> ModifyPermission(string roleName,string permissions)
+        {
+
+            throw new NotImplementedException();
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.EDIT_PERMISSION, [ConnectedUser.Token, ConnectedUser.UserName, roleName,]));
+
+            //Añadir permisos 7 bytes 1 byte x permiso, TODO 
+
+            return mHandler.HandleResponse(message);
+        }
+
+        public async Task<ResponseStatus> DeletePermission(string roleName)
+        {
+
+            throw new NotImplementedException();
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.DELETE_PERMISSION, [ConnectedUser.Token, ConnectedUser.UserName, roleName,]));
+
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> ShowPermission()
+        {
+
+            throw new NotImplementedException();
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.SHOW_PERMISSIONS, [ConnectedUser.Token, ConnectedUser.UserName]));
+
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> EnableManagementMode()        {
+
+            throw new NotImplementedException();
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.ENABLE_MANAGEMENT_MODE, [ConnectedUser.Token, ConnectedUser.UserName]));
+
+
+            return mHandler.HandleResponse(message);
+        }
+
+
+        public async Task<ResponseStatus> DisableManagementMode()
+        {
+
+            throw new NotImplementedException();
+
+            if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
+            {
+                Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
+                return ResponseStatus.ACTION_FAILED;
+
+            }
+
+
+            var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.DISABLE_MANAGEMENT_MODE, [ConnectedUser.Token, ConnectedUser.UserName]));
+
 
             return mHandler.HandleResponse(message);
         }

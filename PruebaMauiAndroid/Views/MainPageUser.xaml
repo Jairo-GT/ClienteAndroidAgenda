@@ -2,7 +2,9 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ClienteAndroidAgenda.Views.MainPageUser"
-             Title="MainPageUser">
+             Title="MainPageUser"
+             xmlns:control="clr-namespace:ClienteAndroidAgenda.Models"
+             >
 
     <ContentPage.ToolbarItems>
         <ToolbarItem 
@@ -14,12 +16,20 @@
                      />
     </ContentPage.ToolbarItems>
 
+  
     <Grid RowDefinitions="*,Auto">
+        
+        
+        
         <VerticalStackLayout Grid.Row="0" VerticalOptions="Center">
             <Label 
                 Text="Página de usuario"
                 VerticalOptions="Center" 
                 HorizontalOptions="Center" />
+
+
+            <control:CustomCalendar/>
+
         </VerticalStackLayout>
 
         <Button Grid.Row="1" 

@@ -1,33 +1,32 @@
-﻿using LibraryClienteAgenda;
+﻿using ClienteAndroidAgenda.ViewModels;
+using LibraryClienteAgenda;
 
 namespace ClienteAndroidAgenda.Views;
 
 public partial class MainPageUser : ContentPage
 {
-    private IServerConnection connection;//Hasta que se añada viewModel
+
+    public readonly MainPageUserViewModel viewModel;
+
     public MainPageUser(IServerConnection connection)
     {
         InitializeComponent();
-        this.connection = connection;
+
+        viewModel = new(connection);
+        BindingContext = viewModel;
+ 
     }
 
     private async void Button_ClickedAsync(object sender, EventArgs e)
     {
 
-
-        var succes = await connection.UserLogout();
-
-        if (succes == ResponseStatus.ACTION_SUCCESS)
-        {
-            await Navigation.PopModalAsync();
-         
-        }
+       viewModel.Logout(Navigation);
     }
 
     private async void PerfilButton_Clicked(object sender, EventArgs e)
     {
 
-        await Navigation.PushAsync(new UserProfilePage(connection));
+        viewModel.GoToProfilePage(Navigation);
 
     }
 }

@@ -1,18 +1,23 @@
-﻿using LibraryClienteAgenda;
+﻿using ClienteAndroidAgenda.ViewModels;
+using LibraryClienteAgenda;
 
 namespace ClienteAndroidAgenda.Views;
 
 public partial class MainPageAdmin : ContentPage
 {
-    public List<string> Users { get; set; } = new List<string>() { "User1", "User2", "User3" };
+    
 
-    private IServerConnection connection; //Hasta que se añade viewmodel
+
+    public readonly MainPageAdminViewModel viewModel;
+  
 
     public MainPageAdmin(IServerConnection connection)
     {
         InitializeComponent();
-        this.connection = connection;
-        userListViewUI.ItemsSource = Users;
+        viewModel = new(connection);
+        BindingContext = viewModel;
+
+        
     }
 
 
@@ -20,13 +25,11 @@ public partial class MainPageAdmin : ContentPage
     {
 
 
-        var succes = await connection.UserLogout();
+        viewModel.Logout(Navigation);
+    }
 
-        if (succes==ResponseStatus.ACTION_SUCCESS)
-        {
-            await Navigation.PopModalAsync();
-          
-
-        }
+    private async void NewUserButton_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new UserRegistrationPage(viewModel.connection));
     }
 }

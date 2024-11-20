@@ -16,11 +16,12 @@
 
         </Grid.RowDefinitions>
     <VerticalStackLayout VerticalOptions="FillAndExpand">
- 
 
-        <Entry Placeholder="Buscar..." Margin="5,5,5,5"/>
+            <Button Text="Nuevo usuario" HorizontalOptions="FillAndExpand"  x:Name="NewUserButton" Clicked="NewUserButton_Clicked"/>
 
-            <ListView x:Name="userListViewUI">
+            <Entry Placeholder="Buscar..." Margin="5,5,5,5"/>
+
+            <ListView x:Name="userListViewUI" ItemsSource="{x:Binding Users}">
           
             <ListView.ItemTemplate>
                 <DataTemplate>

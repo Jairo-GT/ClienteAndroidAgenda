@@ -15,7 +15,8 @@ namespace LibraryClienteAgenda
         private ServerMessageFactory mFactory;
         private IServerMessageHandler mHandler;
         private UserInfo? connectedUser;
-
+        private List<string> UsersListOut = new();
+        private List<string> PermissionsAvailable = new();
         public UserInfo? ConnectedUser { get => connectedUser; set => connectedUser = value; }
 
 
@@ -25,7 +26,6 @@ namespace LibraryClienteAgenda
             mFactory = messageFactory;
             mHandler = handler;
             mHandler.SetConnection(this);
-
         }
 
         /// <summary>
@@ -293,20 +293,23 @@ namespace LibraryClienteAgenda
         }
 
 
-        public async Task<ResponseStatus> GetAllUsers()
+        public async Task<(ResponseStatus, List<string>)> GetAllUsers()
         {
+            UsersListOut.Clear();
 
             if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
             {
                 Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
-                return ResponseStatus.ACTION_FAILED;
+                return (ResponseStatus.ACTION_FAILED,UsersListOut);
 
             }
 
-
+            
+            //Hay que esperar mas de un mensaje // Crear nuevo metodo -->  Single Response  &  Multiple Response; o tener un loop siempre activo, aunque no podemos saber a que se debe una respuesta simplement handlearla.
             var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.GET_ALL_USERS, [ConnectedUser.Token, ConnectedUser.UserName]));
 
-            return mHandler.HandleResponse(message);
+            var response = mHandler.HandleResponse(message);
+            return (response, UsersListOut);
         }
 
 
@@ -372,23 +375,22 @@ namespace LibraryClienteAgenda
         }
 
 
-        public async Task<ResponseStatus> ShowPermission()
+        public async Task<(ResponseStatus,List<string>)> ShowPermission()
         {
-
-            throw new NotImplementedException();
+            PermissionsAvailable.Clear();
 
             if (ConnectedUser == null || String.IsNullOrEmpty(ConnectedUser.Token))
             {
                 Console.WriteLine("ChangeUserDetails: El Token o Usuario conectado no son válidos.");
-                return ResponseStatus.ACTION_FAILED;
+                return (ResponseStatus.ACTION_FAILED,PermissionsAvailable);
 
             }
 
 
             var message = await SendDataAsync(mFactory.Create(Protocol.USER, ClientUserActions.SHOW_PERMISSIONS, [ConnectedUser.Token, ConnectedUser.UserName]));
 
-
-            return mHandler.HandleResponse(message);
+            var response = mHandler.HandleResponse(message);
+            return (response, PermissionsAvailable);
         }
 
 

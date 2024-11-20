@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ClienteAndroidAgenda.Views.UserRegistrationPage"
+             Title="UserRegistrationPage">
+    <VerticalStackLayout VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand">
+        <Entry Placeholder="Nombre usuario" Text="{Binding UserName,Mode=TwoWay}"/>
+        <Entry Placeholder="Contraseña" IsPassword="True" Text="{Binding Password,Mode=TwoWay}"/>
+        <Entry Placeholder="Nombre completo" Text="{Binding FullName,Mode=TwoWay}"/>
+        <Entry Placeholder="Fecha nacimiento: DD/MM/YYYY " Text="{Binding DateBorn,Mode=TwoWay}"/>
+        <Entry Placeholder="Otros datos" Text="{Binding Details,Mode=TwoWay}"/>
+        <Entry Placeholder="Permisos" Text="{Binding Role,Mode=TwoWay}"/>
+        <Button Text="Crear cuenta" Clicked="Button_Clicked"/>
+    </VerticalStackLayout>
+</ContentPage>
